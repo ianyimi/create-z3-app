@@ -1,6 +1,6 @@
 # Product Roadmap
 
-1. [ ] **Framework Installer Architecture** — Build abstract base class system with shared utility methods (env vars, placeholders, dependencies) and framework-specific implementations for TanStack Start and Next.js. Include OAuth provider registry and version management. `M`
+1. [x] **Framework Installer Architecture** — Build abstract base class system with shared utility methods (env vars, placeholders, dependencies) and framework-specific implementations for TanStack Start and Next.js. Include OAuth provider registry and version management. `M`
 
 2. [ ] **CLI Interactive Prompts** — Implement interactive CLI flow with project name validation, framework selection, multi-select OAuth provider choice, and optional Git/GitHub/install prompts using Commander and @inquirer/prompts. `S`
 
