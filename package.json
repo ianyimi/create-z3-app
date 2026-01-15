@@ -1,0 +1,12 @@
+{
+  "name": "create-z3-app-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "pnpm --filter create-z3-app dev",
+    "build": "pnpm --filter create-z3-app build",
+    "test": "pnpm --filter create-z3-app test",
+    "typecheck": "pnpm --filter create-z3-app typecheck"
+  }
+}

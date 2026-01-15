@@ -59,6 +59,8 @@
 │   │   │   │   ├── base.ts                    # FrameworkInstaller abstract class
 │   │   │   │   ├── tanstack.ts                # TanstackInstaller implementation
 │   │   │   │   ├── nextjs.ts                  # NextjsInstaller implementation
+│   │   │   │   ├── deployment.ts              # DeploymentInstaller abstract class
+│   │   │   │   ├── sst.ts                     # SST installer implementation
 │   │   │   │   └── versions.ts                # Centralized dependency versions
 │   │   │   │
 │   │   │   ├── helpers/
@@ -177,16 +179,50 @@
 
 ### Phase 3: CLI Prompts & User Flow (30 mins)
 
-**Goal**: Interactive prompts for project configuration
+**Goal**: Interactive survey-first CLI with optional flag support
+
+#### Design Philosophy:
+The CLI prioritizes an **interactive survey experience** where users can run `create-z3-app my-app` and be guided through all configuration options. Flags are available for CI/automation but the primary UX is conversational prompts.
 
 #### Tasks:
-1. **Create CLI prompt flow** (`src/cli/index.ts`):
-   - Project name (with validation)
-   - Framework selection (TanStack Start / Next.js)
-   - OAuth providers (multi-select: Google, GitHub, Discord, Twitter, None)
-   - Initialize Git? (yes/no)
-   - Create GitHub repo? (yes/no - only if git initialized)
-   - Install dependencies? (yes/no)
+1. **Create interactive survey flow** (`src/cli/index.ts`):
+
+   **Survey Order (in sequence)**:
+   1. **Project name** (required)
+      - If provided as argument (`create-z3-app my-app`), use it
+      - Otherwise, prompt for project name with validation
+
+   2. **Framework selection** (required)
+      - Prompt: "Which framework would you like to use?"
+      - Options: TanStack Start, Next.js
+      - Default: TanStack Start
+
+   3. **OAuth providers** (required, can select "None")
+      - Prompt: "Which OAuth providers would you like to add?"
+      - Multi-select: Google, GitHub, Discord, Twitter, None
+      - Default: None selected
+
+   4. **Initialize Git?** (required)
+      - Prompt: "Initialize a Git repository?"
+      - Options: Yes / No
+      - Default: Yes
+
+   5. **Create GitHub repo?** (conditional)
+      - Only shown if Git initialization is Yes
+      - Prompt: "Create a GitHub repository?"
+      - Options: Yes / No
+      - Default: No
+
+   6. **Deployment target** (optional - can skip)
+      - Prompt: "Select a deployment platform (optional, press Enter to skip)"
+      - Options: Vercel, SST, Skip
+      - Default: Skip
+      - This comes LAST as it's optional configuration
+
+   7. **Install dependencies?** (required)
+      - Prompt: "Install dependencies now?"
+      - Options: Yes / No
+      - Default: Yes
 
 2. **Add input validation** (`src/utils/validation.ts`):
    - Project name format (no spaces, valid npm package name)
@@ -196,13 +232,21 @@
 
 3. **Create CLI interface** (`src/index.ts`):
    - Setup Commander with version, description, help
-   - Parse command-line arguments
-   - Run interactive prompts
-   - Handle fallback to flags for CI environments
+   - Parse command-line arguments (optional flags)
+   - **Primary flow**: Interactive survey prompts
+   - **Secondary flow**: Flag-based configuration for CI/automation
+   - If flags provided, skip corresponding prompts
+   - If flags missing, launch interactive survey for those options
+
+4. **Flag override behavior**:
+   - User can provide some flags and be prompted for the rest
+   - Example: `create-z3-app my-app --framework tanstack` → only prompts for OAuth, Git, GitHub repo, deployment, install
+   - All flags are optional; interactive prompts fill in the gaps
 
 **Deliverables**:
-- Complete interactive prompt flow
+- Survey-first interactive prompt flow
 - Input validation
+- Optional flag support for automation
 - CLI help text and documentation
 
 ---
@@ -331,7 +375,68 @@
 
 ---
 
-### Phase 8: Testing & Polish (15 mins)
+### Phase 8: Deployment Configuration (Future Feature)
+
+**Goal**: Add optional deployment platform selection and configuration
+
+#### Design Philosophy:
+Deployment configuration is **optional** and appears **last in the survey** after all required questions. Users can press Enter to skip and use the default (Vercel, which requires no configuration), or select SST for custom infrastructure setup.
+
+#### Tasks:
+1. **Add deployment prompt** (`src/cli/index.ts`):
+   - Position: Last prompt in the survey (after install dependencies prompt)
+   - Prompt: "Select a deployment platform (optional, press Enter to skip)"
+   - Options: Vercel (default), SST, Skip
+   - Default behavior: Skip (no additional configuration)
+   - Can be skipped entirely with Enter key
+   - Flag alternative: `--deployment sst` or `--no-deployment`
+
+2. **Create deployment installer** (`src/installers/deployment.ts`):
+   - Abstract interface for deployment configurations
+   - SST installer implementation
+   - Vercel installer (no-op, as it works out of the box)
+
+3. **SST Configuration** (`src/installers/sst.ts`):
+   - Generate `sst.config.ts` for TanStack Start:
+     ```typescript
+     /// <reference path="./.sst/platform/config.d.ts" />
+     export default $config({
+       app(input) {
+         return {
+           name: "{{PROJECT_NAME}}",
+           removal: input?.stage === "production" ? "retain" : "remove",
+         };
+       },
+       async run() {
+         new sst.aws.TanstackStart("MyWeb");
+       },
+     });
+     ```
+   - Generate `sst.config.ts` for Next.js with appropriate configuration
+   - Add SST dependencies to package.json: `sst@latest`
+   - Add SST scripts: `"sst:dev": "sst dev"`, `"sst:deploy": "sst deploy"`
+   - Create `.sst` directory structure
+   - Add SST environment variable instructions to success message
+
+4. **Update project creation flow** (`src/helpers/createProject.ts`):
+   - Call deployment installer after framework setup
+   - Pass deployment selection to installer
+   - Update success message with deployment-specific next steps
+
+5. **Documentation**:
+   - Add SST setup instructions to success message
+   - Add deployment-specific environment setup
+   - Link to SST docs for TanStack Start / Next.js
+
+**Deliverables**:
+- Deployment platform selection in CLI
+- SST configuration generation
+- Updated success message with deployment instructions
+- Ready for future deployment platforms (Netlify, Cloudflare, etc.)
+
+---
+
+### Phase 9: Testing & Polish (15 mins)
 
 **Goal**: Test both frameworks and fix any issues
 
@@ -539,26 +644,37 @@ Follow Semantic Versioning (semver):
 
 ### Planned Enhancements
 
-1. **Color System Integration**:
+1. **Deployment Target Selection** (High Priority):
+   - Add CLI prompt for deployment platform selection
+   - **Vercel**: Default option, no additional configuration needed
+   - **SST (Serverless Stack)**:
+     - Generate `sst.config.ts` with TanStack Start or Next.js configuration
+     - Add SST dependencies (`sst`, `@aws-sdk/*` packages as needed)
+     - Create deployment-specific environment variable setup
+     - Add SST-specific scripts to package.json (`sst dev`, `sst deploy`)
+   - Future platforms: Netlify, Cloudflare Pages, AWS Amplify
+
+2. **Color System Integration**:
    - Add CLI prompt for color selection
    - Integrate tweakcn.com color palettes
    - Auto-generate Tailwind color config
 
-2. **Database Provider Options**:
+3. **Database Provider Options**:
    - Support other databases alongside Convex
    - Drizzle ORM integration
    - Prisma as alternative
 
-3. **Deployment Presets**:
-   - Vercel configuration
+4. **Additional Deployment Platforms**:
    - Netlify configuration
    - Cloudflare Pages setup
+   - AWS Amplify integration
+   - Railway deployment
 
-4. **Component Library Options**:
+5. **Component Library Options**:
    - Additional UI library choices
    - Custom component starter packs
 
-5. **Testing Setup**:
+6. **Testing Setup**:
    - Vitest configuration
    - Playwright e2e tests
    - Testing utilities
@@ -577,37 +693,71 @@ Follow Semantic Versioning (semver):
 
 ## CLI Usage Examples
 
-### Basic Usage
+### Primary Usage: Interactive Survey (Recommended)
 
 ```bash
-# Interactive mode (recommended)
-npm create zaye-stack
-
-# With project name
+# Interactive survey - prompts for everything
 npm create zaye-stack my-app
 
+# The CLI will guide you through:
+# ✓ Framework selection (TanStack Start / Next.js)
+# ✓ OAuth providers (Google, GitHub, Discord, Twitter, or None)
+# ✓ Git initialization (Yes / No)
+# ✓ GitHub repo creation (Yes / No - only if Git is Yes)
+# ✓ Deployment platform (Vercel, SST, or Skip) - OPTIONAL, can press Enter to skip
+# ✓ Install dependencies (Yes / No)
+
+# Without project name - will prompt for it first
+npm create zaye-stack
+
 # Using pnpm
-pnpm create zaye-stack
+pnpm create zaye-stack my-app
 
 # Using yarn
-yarn create zaye-stack
+yarn create zaye-stack my-app
 ```
 
-### CLI Flags (for CI/non-interactive)
+### Hybrid Usage: Partial Flags + Interactive Prompts
 
 ```bash
-# All options via flags
+# Provide some flags, get prompted for the rest
+npm create zaye-stack my-app --framework tanstack
+# → Will only prompt for: OAuth, Git, GitHub repo, deployment, install
+
+npm create zaye-stack my-app --framework nextjs --oauth google,github
+# → Will only prompt for: Git, GitHub repo, deployment, install
+
+# Skip optional deployment prompt by providing flag
+npm create zaye-stack my-app --no-deployment
+# → Interactive survey, but skips deployment selection
+```
+
+### Full Flag Mode (for CI/automation)
+
+```bash
+# All options via flags (no prompts)
 npm create zaye-stack my-app \
   --framework tanstack \
   --oauth google,github \
   --git \
   --no-github-repo \
+  --no-deployment \
   --install
 
-# Minimal setup
+# With deployment platform
+npm create zaye-stack my-app \
+  --framework tanstack \
+  --deployment sst \
+  --oauth google,github \
+  --git \
+  --install
+
+# Minimal setup (no OAuth, no Git, no install, no deployment)
 npm create zaye-stack my-app \
   --framework nextjs \
+  --no-oauth \
   --no-git \
+  --no-deployment \
   --no-install
 ```
 
@@ -619,14 +769,33 @@ npm create zaye-stack --help
 # Output:
 # create-zaye-stack - Create a new full-stack app
 #
+# Usage:
+#   $ npm create zaye-stack [project-name] [options]
+#
+# The CLI will interactively prompt for any missing options.
+# Recommended: Run without flags for a guided setup experience.
+#
 # Options:
 #   -f, --framework <framework>     Framework to use (tanstack|nextjs)
 #   -o, --oauth <providers>         OAuth providers (google,github,discord,twitter)
+#       --no-oauth                  Skip OAuth provider setup
 #   -g, --git                       Initialize git repository
-#   -r, --github-repo               Create GitHub repository
-#   --no-install                    Skip dependency installation
+#       --no-git                    Skip git initialization
+#   -r, --github-repo               Create GitHub repository (requires --git)
+#       --no-github-repo            Skip GitHub repo creation
+#   -d, --deployment <platform>     Deployment platform (vercel|sst)
+#       --no-deployment             Skip deployment configuration (default)
+#   -i, --install                   Install dependencies (default)
+#       --no-install                Skip dependency installation
 #   -h, --help                      Display help
 #   -v, --version                   Display version
+#
+# Examples:
+#   $ npm create zaye-stack my-app              # Interactive survey (recommended)
+#   $ npm create zaye-stack my-app --framework tanstack
+#                                               # Partial flags + prompts
+#   $ npm create zaye-stack my-app --framework tanstack --oauth google,github --git --install
+#                                               # Full automation (CI mode)
 ```
 
 ---
@@ -672,6 +841,111 @@ pnpm test:local
 # Link globally for local testing
 npm link
 create-zaye-stack test-project
+```
+
+---
+
+## CLI User Experience Design
+
+### Survey-First Philosophy
+
+The CLI is designed with an **interactive survey as the primary user experience**. This creates a conversational, guided flow that's approachable for developers of all experience levels.
+
+**Key UX Principles:**
+
+1. **Progressive Disclosure**: Questions are asked in order of importance
+   - Required questions first (framework, OAuth, Git)
+   - Optional questions last (deployment platform)
+
+2. **Smart Defaults**: Every prompt has a sensible default
+   - Framework: TanStack Start (recommended)
+   - OAuth: None (user explicitly adds what they need)
+   - Git: Yes (most projects need version control)
+   - GitHub repo: No (not everyone uses GitHub)
+   - Deployment: Skip (Vercel works by default, no config needed)
+   - Install: Yes (most users want to start coding immediately)
+
+3. **Skippable Optionals**: Optional configuration can be skipped with Enter
+   - Deployment prompt explicitly says "(optional, press Enter to skip)"
+   - User is never forced to make a decision they don't need to
+
+4. **Flag Flexibility**: Supports three modes:
+   - **Full interactive**: `create-z3-app my-app` (recommended for humans)
+   - **Hybrid**: `create-z3-app my-app --framework tanstack` (some automation, some interaction)
+   - **Full automation**: All flags provided (for CI/CD pipelines)
+
+5. **Visual Clarity**: Using @inquirer/prompts for beautiful terminal UI
+   - Radio buttons for single-select (framework, git, install)
+   - Checkboxes for multi-select (OAuth providers)
+   - Confirmation prompts for yes/no questions
+   - Color-coded output with chalk (success = green, error = red, info = blue)
+   - Spinners with ora for long-running operations
+
+### Survey Flow Diagram
+
+```
+┌─────────────────────────────────────────────┐
+│  create-z3-app my-app                       │
+└─────────────────────────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Project name?         │ (if not provided)
+       │  [my-app]             │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Framework?            │ ✅ Required
+       │  ○ TanStack Start     │
+       │  ○ Next.js            │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  OAuth providers?      │ ✅ Required (can pick "None")
+       │  ☑ Google             │
+       │  ☐ GitHub             │
+       │  ☐ Discord            │
+       │  ☐ Twitter            │
+       │  ☐ None               │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Initialize Git?       │ ✅ Required
+       │  ○ Yes                │
+       │  ○ No                 │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Create GitHub repo?   │ ✅ Required (if Git = Yes)
+       │  ○ Yes                │
+       │  ○ No                 │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Deployment platform?  │ ⚠️ OPTIONAL (can skip)
+       │  (press Enter to skip) │
+       │  ○ Vercel             │
+       │  ○ SST                │
+       │  ○ Skip               │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  Install dependencies? │ ✅ Required
+       │  ○ Yes                │
+       │  ○ No                 │
+       └────────────────────────┘
+                    │
+                    ▼
+       ┌────────────────────────┐
+       │  🚀 Creating project   │
+       │  [spinner animation]   │
+       └────────────────────────┘
 ```
 
 ---
