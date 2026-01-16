@@ -21,21 +21,13 @@ export const createAuth = (
   { optionsOnly } = { optionsOnly: false }
 ) => {
   return betterAuth({
-    socialProviders: {
-      google: {
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirectURI: `${process.env.SITE_URL}/api/auth/callback/google`
-      }
-    },
+    // {{EMAIL_PASSWORD_AUTH}}
+    // {{OAUTH_PROVIDERS}}
     account: {
       modelName: TABLE_SLUG_ACCOUNTS
     },
     baseURL: process.env.SITE_URL,
     database: convexAdapter(ctx, schema),
-    emailAndPassword: {
-      enabled: true
-    },
     logger: {
       disabled: optionsOnly
     },

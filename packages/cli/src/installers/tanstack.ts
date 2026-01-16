@@ -9,9 +9,12 @@ import { join } from 'path';
 import { FrameworkInstaller } from './base.js';
 import {
   replacePlaceholder,
-  generateOAuthConfigBlock,
-  generateOAuthUIConfigBlock,
+  generateAuthProvidersBlock,
+  generateOAuthUIProvidersBlock,
   generateEnvVarsBlock,
+  generateReadmeSection,
+  generateEnvTsServerSchema,
+  generateEnvTsRuntimeMapping,
 } from './string-utils.js';
 
 /**
@@ -29,53 +32,75 @@ export class TanStackInstaller extends FrameworkInstaller {
   /**
    * Update OAuth configuration in Convex auth file
    * Target file: convex/auth/index.ts
-   * Placeholder: // {{OAUTH_PROVIDERS}}
+   * Placeholders: // {{EMAIL_PASSWORD_AUTH}} and // {{OAUTH_PROVIDERS}}
    *
    * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
    */
-  async updateOAuthConfig(selectedProviders: string[]): Promise<void> {
+  async updateOAuthConfig(
+    selectedProviders: string[],
+    emailPasswordEnabled: boolean
+  ): Promise<void> {
     const authFilePath = join(this.targetPath, 'convex/auth/index.ts');
-    const configBlock = generateOAuthConfigBlock(selectedProviders);
 
-    if (configBlock) {
-      await replacePlaceholder(
-        authFilePath,
-        '// {{OAUTH_PROVIDERS}}',
-        configBlock
-      );
-    }
+    // Generate the combined auth providers block
+    const authProvidersBlock = generateAuthProvidersBlock(
+      selectedProviders,
+      emailPasswordEnabled
+    );
+
+    // Replace EMAIL_PASSWORD_AUTH placeholder - this will be removed in the new approach
+    // since we're using a unified providers block
+    // The template will have both placeholders, but we'll use just OAUTH_PROVIDERS
+    // for the combined block
+
+    // Replace OAUTH_PROVIDERS placeholder with the combined auth providers block
+    await replacePlaceholder(
+      authFilePath,
+      '// {{OAUTH_PROVIDERS}}',
+      authProvidersBlock
+    );
+
+    // Remove the EMAIL_PASSWORD_AUTH placeholder line if it exists
+    // by replacing it with empty string
+    await replacePlaceholder(
+      authFilePath,
+      '// {{EMAIL_PASSWORD_AUTH}}',
+      '',
+      { graceful: true }
+    );
   }
 
   /**
-   * Update OAuth UI configuration in auth client file
-   * Target file: src/lib/auth/client.ts
+   * Update OAuth UI configuration in providers file
+   * Target file: src/providers.tsx
    * Placeholder: // {{OAUTH_UI_PROVIDERS}}
    *
    * @param selectedProviders - Array of provider IDs to configure
    */
   async updateOAuthUIConfig(selectedProviders: string[]): Promise<void> {
-    const clientFilePath = join(this.targetPath, 'src/lib/auth/client.ts');
-    const uiConfigBlock = generateOAuthUIConfigBlock(selectedProviders);
+    const providersFilePath = join(this.targetPath, 'src/providers.tsx');
+    const uiConfigBlock = generateOAuthUIProvidersBlock(selectedProviders);
 
-    if (uiConfigBlock) {
-      await replacePlaceholder(
-        clientFilePath,
-        '// {{OAUTH_UI_PROVIDERS}}',
-        uiConfigBlock
-      );
-    }
+    // This will either add the social prop or remove the line entirely
+    await replacePlaceholder(
+      providersFilePath,
+      '// {{OAUTH_UI_PROVIDERS}}',
+      uiConfigBlock
+    );
   }
 
   /**
    * Update .env.example with OAuth environment variables
    * Target file: .env.example
    * Placeholder: # {{ENV_OAUTH_VARS}}
+   * Applies VITE_ prefix for client-side variables
    *
    * @param selectedProviders - Array of provider IDs to configure
    */
   async updateEnvExample(selectedProviders: string[]): Promise<void> {
     const envFilePath = join(this.targetPath, '.env.example');
-    const envVarsBlock = generateEnvVarsBlock(selectedProviders);
+    const envVarsBlock = generateEnvVarsBlock(selectedProviders, 'tanstack');
 
     if (envVarsBlock) {
       await replacePlaceholder(
@@ -87,9 +112,31 @@ export class TanStackInstaller extends FrameworkInstaller {
   }
 
   /**
+   * Update README with OAuth provider setup guides
+   * Target file: README.md
+   * Placeholder: <!-- {{OAUTH_SETUP_GUIDE}} -->
+   * Handles missing placeholder gracefully with warning
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   */
+  async updateReadme(selectedProviders: string[]): Promise<void> {
+    const readmeFilePath = join(this.targetPath, 'README.md');
+    const readmeSection = generateReadmeSection(selectedProviders);
+
+    if (readmeSection) {
+      await replacePlaceholder(
+        readmeFilePath,
+        '<!-- {{OAUTH_SETUP_GUIDE}} -->',
+        readmeSection,
+        { graceful: true }
+      );
+    }
+  }
+
+  /**
    * Apply TweakCN theme to global CSS file
    * Target file: src/styles/globals.css
-   * Placeholder: /* {{TWEAKCN_THEME}} *\/
+   * Placeholder: CSS comment with TWEAKCN_THEME variable
    *
    * @param themeContent - CSS content to apply
    */
@@ -100,6 +147,34 @@ export class TanStackInstaller extends FrameworkInstaller {
       cssFilePath,
       '/* {{TWEAKCN_THEME}} */',
       themeContent
+    );
+  }
+
+  /**
+   * Update env.ts with OAuth provider environment variables
+   * Target file: src/env.ts
+   * Placeholders: // {{OAUTH_ENV_SERVER_SCHEMA}} and // {{OAUTH_ENV_RUNTIME_MAPPING}}
+   * Adds zod schema validation and runtime mappings for OAuth credentials
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   */
+  async updateEnvTs(selectedProviders: string[]): Promise<void> {
+    const envFilePath = join(this.targetPath, 'src/env.ts');
+
+    // Generate server schema (zod validation)
+    const serverSchema = generateEnvTsServerSchema(selectedProviders);
+    await replacePlaceholder(
+      envFilePath,
+      '// {{OAUTH_ENV_SERVER_SCHEMA}}',
+      serverSchema
+    );
+
+    // Generate runtime mapping (process.env assignments)
+    const runtimeMapping = generateEnvTsRuntimeMapping(selectedProviders);
+    await replacePlaceholder(
+      envFilePath,
+      '// {{OAUTH_ENV_RUNTIME_MAPPING}}',
+      runtimeMapping
     );
   }
 }

@@ -103,6 +103,12 @@ pnpm dev
 
 Visit `http://localhost:3000` to see your application running.
 
+## Authentication Setup
+
+This project uses Better Auth for authentication.
+
+<!-- {{OAUTH_SETUP_GUIDE}} -->
+
 ## Customizing Authentication
 
 ### Adding OAuth Providers

@@ -16,6 +16,21 @@ export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun';
 export type Framework = 'nextjs' | 'tanstack';
 
 /**
+ * Environment variable configuration interface
+ * Defines the structure for OAuth provider environment variables
+ */
+export interface EnvVariable {
+  /** Environment variable name (e.g., 'GOOGLE_CLIENT_ID') */
+  name: string;
+
+  /** Variable type determines framework-specific prefix application */
+  type: 'server' | 'client';
+
+  /** Human-readable description of the variable's purpose */
+  description: string;
+}
+
+/**
  * OAuth provider configuration interface
  * Defines the structure for each OAuth provider supported by Better Auth
  */
@@ -34,6 +49,51 @@ export interface OAuthProvider {
 
   /** Environment variable name for client secret */
   clientSecretVar: string;
+
+  /** Indicates if provider appears in default/popular list (defaults to false if not specified) */
+  popular?: boolean;
+
+  /** Better Auth configuration code snippets for code generation */
+  betterAuthConfig?: {
+    /** Import statement if needed (empty string for most providers) */
+    import: string;
+
+    /** Complete provider config code snippet for socialProviders block */
+    socialProvider: string;
+
+    /** Client-side provider string for UI (e.g., '"google"' for signIn.social) */
+    clientSideProvider: string;
+
+    /** Optional required scopes array (e.g., ['user:email'] for GitHub) */
+    scopes?: string[];
+  };
+
+  /** Environment variables to generate for this provider */
+  env?: Array<EnvVariable>;
+
+  /** Documentation URLs for provider setup */
+  docs?: {
+    /** URL to provider's OAuth setup documentation */
+    provider: string;
+
+    /** URL to Better Auth provider-specific documentation */
+    betterAuth: string;
+  };
+
+  /** Flag for providers needing more than clientId/clientSecret (defaults to false if not specified) */
+  requiresExtraConfig?: boolean;
+
+  /** Documentation for extra setup requirements */
+  extraConfigNotes?: string;
+
+  /** README template for setup guide generation */
+  readme?: {
+    /** Section heading for README (e.g., 'GitHub OAuth Setup') */
+    title: string;
+
+    /** Markdown setup guide content */
+    content: string;
+  };
 }
 
 /**
@@ -59,17 +119,17 @@ export interface ProjectOptions {
   /** Selected framework for the project */
   framework: Framework;
 
+  /** Whether to enable email/password authentication */
+  emailPasswordAuth: boolean;
+
   /** Array of OAuth provider IDs to configure (e.g., ['google', 'github']) */
   oauthProviders: string[];
 
   /** Optional TweakCN theme configuration */
   tweakcnTheme?: TweakCNTheme;
 
-  /** Whether to create a GitHub repository */
-  createGitHubRepo: boolean;
-
-  /** Whether the GitHub repository should be private (only relevant if createGitHubRepo is true) */
-  gitHubRepoPrivate?: boolean;
+  /** Whether to initialize Git repository */
+  initGit: boolean;
 
   /** Whether to install dependencies after project creation */
   installDependencies: boolean;

@@ -38,8 +38,7 @@ export const env = createEnv({
     // Convex deployment URL (server-side operations)
     CONVEX_URL: z.string().url().optional(),
 
-    GOOGLE_CLIENT_ID: z.string().optional(),
-    GOOGLE_CLIENT_SECRET: z.string().optional(),
+    // {{OAUTH_ENV_SERVER_SCHEMA}}
   },
 
   /**
@@ -71,8 +70,8 @@ export const env = createEnv({
     AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     CONVEX_URL: process.env.CONVEX_URL,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+    // {{OAUTH_ENV_RUNTIME_MAPPING}}
 
     // Client vars (Vite exposes these automatically to import.meta.env)
     VITE_CONVEX_URL: process.env.VITE_CONVEX_URL,

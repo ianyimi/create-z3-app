@@ -34,8 +34,9 @@ The spec-researcher will give you several separate responses that you MUST show 
 2. Follow-up questions if needed (based on user's answers and provided visuals)
 
 **IMPORTANT**:
-- Display these questions to the user and wait for their response
-- The spec-researcher may ask you to relay follow-up questions that you must present to user
+- ALWAYS use the AskUserQuestion tool to present clarifying questions to the user
+- DO NOT display questions as plain text - use the interactive question tool
+- The spec-researcher may ask you to relay follow-up questions that you must present to user using AskUserQuestion
 
 ### PHASE 3: Inform the user
 
