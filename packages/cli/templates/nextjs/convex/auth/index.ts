@@ -21,13 +21,26 @@ export const createAuth = (
   { optionsOnly } = { optionsOnly: false }
 ) => {
   return betterAuth({
-    // {{EMAIL_PASSWORD_AUTH}}
-    // {{OAUTH_PROVIDERS}}
+    socialProviders: {
+      spotify: {
+        clientId: process.env.SPOTIFY_CLIENT_ID!,
+        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+        redirectURI: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth/callback/spotify`,
+        scope: [
+          "playlist-read-private",
+          "playlist-read-collaborative",
+          "user-library-read"
+        ]
+      },
+    },
     account: {
       modelName: TABLE_SLUG_ACCOUNTS
     },
     baseURL: process.env.SITE_URL,
     database: convexAdapter(ctx, schema),
+    emailAndPassword: {
+      enabled: true
+    },
     logger: {
       disabled: optionsOnly
     },
@@ -36,7 +49,7 @@ export const createAuth = (
     session: {
       modelName: TABLE_SLUG_SESSIONS
     },
-    trustedOrigins: [process.env.SITE_URL],
+    trustedOrigins: [process.env.SITE_URL!],
     user: {
       additionalFields: {
         role: {
