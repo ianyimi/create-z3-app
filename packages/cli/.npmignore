@@ -1,0 +1,13 @@
+# Include .env.example files in templates
+!templates/**/.env.example
+
+# Exclude development files
+src/
+tsconfig.json
+vitest.config.ts
+.gitignore
+
+# Exclude test files
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts

@@ -19,6 +19,7 @@ import { getPopularProviders, getAdditionalProviders } from './installers/provid
 import { getProvidersRequiringExtraConfig } from './installers/string-utils.js';
 import type { TweakCNTheme, ProjectOptions, Framework } from './installers/types.js';
 import { TanStackInstaller } from './installers/tanstack.js';
+import { NextJSInstaller } from './installers/nextjs.js';
 
 // Get package.json for version
 const __filename = fileURLToPath(import.meta.url);
@@ -254,8 +255,7 @@ program
       if (framework === 'tanstack') {
         installer = new TanStackInstaller(createdPath, projectName);
       } else {
-        // For now, throw an error for Next.js until it's implemented
-        throw new Error('Next.js installer not yet implemented. Please use TanStack Start.');
+        installer = new NextJSInstaller(createdPath, projectName);
       }
 
       // Execute all configuration steps through the installer

@@ -10,28 +10,36 @@ import { getProvider } from './providers.js';
 import type { Framework, OAuthProvider } from './types.js';
 
 /**
- * Default theme CSS variables for shadcn/ui
+ * Default theme CSS variables for shadcn/ui in OKLCH format
  * Applied when user skips TweakCN theme prompt
+ *
+ * OKLCH provides a perceptually uniform color space with better interpolation
+ * compared to HSL. Values are converted from the original shadcn/ui HSL theme.
+ *
+ * Format: --variable-name: L% C H;
+ * - L (Lightness): 0-100%
+ * - C (Chroma): 0-0.4 (typical range)
+ * - H (Hue): 0-360 degrees
  */
-export const DEFAULT_THEME = `--background: 0 0% 100%;
---foreground: 240 10% 3.9%;
---card: 0 0% 100%;
---card-foreground: 240 10% 3.9%;
---popover: 0 0% 100%;
---popover-foreground: 240 10% 3.9%;
---primary: 240 5.9% 10%;
---primary-foreground: 0 0% 98%;
---secondary: 240 4.8% 95.9%;
---secondary-foreground: 240 5.9% 10%;
---muted: 240 4.8% 95.9%;
---muted-foreground: 240 3.8% 46.1%;
---accent: 240 4.8% 95.9%;
---accent-foreground: 240 5.9% 10%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 0 0% 98%;
---border: 240 5.9% 90%;
---input: 240 5.9% 90%;
---ring: 240 5.9% 10%;
+export const DEFAULT_THEME = `--background: 100% 0.000 0;
+--foreground: 3.9% 0.006 240;
+--card: 100% 0.000 0;
+--card-foreground: 3.9% 0.006 240;
+--popover: 100% 0.000 0;
+--popover-foreground: 3.9% 0.006 240;
+--primary: 10% 0.003 240;
+--primary-foreground: 98% 0.000 0;
+--secondary: 95.9% 0.002 240;
+--secondary-foreground: 10% 0.003 240;
+--muted: 95.9% 0.002 240;
+--muted-foreground: 46.1% 0.002 240;
+--accent: 95.9% 0.002 240;
+--accent-foreground: 10% 0.003 240;
+--destructive: 60.2% 0.168 0;
+--destructive-foreground: 98% 0.000 0;
+--border: 90% 0.003 240;
+--input: 90% 0.003 240;
+--ring: 10% 0.003 240;
 --radius: 0.5rem;`;
 
 /**
@@ -64,7 +72,7 @@ export async function replacePlaceholder(
   filePath: string,
   placeholder: string,
   content: string,
-  options?: { graceful?: boolean }
+  options?: { graceful?: boolean; inline?: boolean }
 ): Promise<void> {
   // Read the file content
   const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -81,6 +89,13 @@ export async function replacePlaceholder(
     throw new Error(
       `Placeholder "${placeholder}" not found in file: ${filePath}`
     );
+  }
+
+  // If inline mode, do simple string replacement
+  if (options?.inline) {
+    const updatedContent = fileContent.replace(placeholder, content);
+    await fs.writeFile(filePath, updatedContent, 'utf-8');
+    return;
   }
 
   // Split content into lines to preserve indentation
@@ -145,22 +160,40 @@ export function generateEmailPasswordConfig(enabled: boolean): string {
 }
 
 /**
+ * Generates the credentials prop for Better Auth UI Provider
+ * Used to enable/disable email & password authentication UI
+ *
+ * @param enabled - Whether email/password authentication is enabled
+ * @returns Complete credentials prop with boolean value
+ *
+ * @example
+ * generateCredentialsValue(true)
+ * // Returns: 'credentials={true}'
+ *
+ * generateCredentialsValue(false)
+ * // Returns: 'credentials={false}'
+ */
+export function generateCredentialsValue(enabled: boolean): string {
+  return `credentials={${enabled}}`;
+}
+
+/**
  * Generates the complete authentication providers block for Better Auth
  * Combines email/password and OAuth provider configurations using proper Better Auth object structure
  *
  * @param oauthProviders - Array of OAuth provider IDs (e.g., ['google', 'github'])
  * @param emailPasswordEnabled - Whether email/password authentication is enabled
- * @returns Combined authentication configuration, or empty string if nothing enabled
+ * @returns Combined authentication configuration with emailAndPassword always included
  *
  * @example
  * generateAuthProvidersBlock(['google', 'github'], true)
- * // Returns proper Better Auth object structure with emailAndPassword and socialProviders
+ * // Returns: emailAndPassword: { enabled: true }, and socialProviders with google and github
  *
  * generateAuthProvidersBlock(['google'], false)
- * // Returns socialProviders object only
+ * // Returns: emailAndPassword: { enabled: false }, and socialProviders with google
  *
- * generateAuthProvidersBlock([], false)
- * // Returns '' (triggers line removal)
+ * generateAuthProvidersBlock([], true)
+ * // Returns: emailAndPassword: { enabled: true }, (no socialProviders)
  */
 export function generateAuthProvidersBlock(
   oauthProviders: string[],
@@ -168,12 +201,10 @@ export function generateAuthProvidersBlock(
 ): string {
   const parts: string[] = [];
 
-  // Add email/password if enabled (using object structure)
-  if (emailPasswordEnabled) {
-    parts.push(`emailAndPassword: {
-      enabled: true
+  // Always add email/password configuration with enabled set to true or false
+  parts.push(`emailAndPassword: {
+      enabled: ${emailPasswordEnabled}
     },`);
-  }
 
   // Add OAuth providers (using object structure)
   if (oauthProviders.length > 0) {
@@ -186,13 +217,13 @@ export function generateAuthProvidersBlock(
 
         // Build the provider configuration object
         const configLines: string[] = [
-          `clientId: process.env.${provider.envPrefix}_CLIENT_ID as string,`,
-          `clientSecret: process.env.${provider.envPrefix}_CLIENT_SECRET as string,`
+          `clientId: process.env.${provider.envPrefix}_CLIENT_ID!,`,
+          `clientSecret: process.env.${provider.envPrefix}_CLIENT_SECRET!,`
         ];
 
         // Add extra fields if needed (like Figma's clientKey)
         if (providerId === 'figma') {
-          configLines.push(`clientKey: process.env.FIGMA_CLIENT_KEY as string,`);
+          configLines.push(`clientKey: process.env.FIGMA_CLIENT_KEY!,`);
         }
 
         return `${providerId}: {
@@ -305,23 +336,22 @@ export function generateEnvTsRuntimeMapping(providers: string[]): string {
 }
 
 /**
- * Generates the social prop configuration for AuthUIProviderTanstack component
- * Used in src/providers.tsx for OAuth UI integration
+ * Generates the complete social prop for AuthUIProvider
+ * Used in src/providers.tsx and src/auth/client.tsx for OAuth UI integration
  *
  * @param providers - Array of OAuth provider IDs (e.g., ['google', 'github'])
- * @returns Social prop configuration if providers exist, removal marker if empty
+ * @returns Complete social prop object if providers exist, empty string if no providers
  *
  * @example
  * generateOAuthUIProvidersBlock(['google', 'github'])
  * // Returns: 'social={{\n  providers: ["google", "github"]\n}}'
  *
  * generateOAuthUIProvidersBlock([])
- * // Returns: '__REMOVE_SOCIAL_PROP__' (triggers line removal)
+ * // Returns: '' (no social prop)
  */
 export function generateOAuthUIProvidersBlock(providers: string[]): string {
   if (providers.length === 0) {
-    // Return special marker to indicate removal of entire social prop line
-    return '__REMOVE_SOCIAL_PROP__';
+    return '';
   }
 
   const providerList = providers.map(id => `"${id}"`).join(', ');

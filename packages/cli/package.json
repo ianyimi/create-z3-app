@@ -1,6 +1,6 @@
 {
   "name": "create-z3",
-  "version": "0.0.12",
+  "version": "0.0.23",
   "type": "module",
   "description": "CLI for scaffolding Z3 Stack applications (TanStack/Next.js + Convex + Better Auth)",
   "bin": {
@@ -25,7 +25,8 @@
     "ora": "^8.1.0",
     "execa": "^9.5.2",
     "sort-package-json": "^2.10.0",
-    "validate-npm-package-name": "^5.0.0"
+    "validate-npm-package-name": "^5.0.0",
+    "color-convert": "^2.0.1"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
@@ -33,6 +34,7 @@
     "@types/node": "^22.0.0",
     "@types/fs-extra": "^11.0.0",
     "@types/validate-npm-package-name": "^4.0.0",
+    "@types/color-convert": "^2.0.3",
     "vitest": "^2.0.0"
   },
   "engines": {

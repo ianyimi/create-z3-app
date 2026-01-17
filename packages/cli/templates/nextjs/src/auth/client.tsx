@@ -31,16 +31,14 @@ export default function BetterAuthClientProvider({ children }: { children: React
   return (
     <AuthUIProvider
       authClient={authClient}
-      credentials={true}
+      /* {{EMAIL_PASSWORD_CREDENTIALS}} */
       Link={Link}
       navigate={router.push}
       onSessionChange={() => {
         router.refresh()
       }}
       replace={router.replace}
-      social={{
-        providers: ["spotify"],
-      }}
+      // {{OAUTH_UI_PROVIDERS}}
     >
       {children}
     </AuthUIProvider>

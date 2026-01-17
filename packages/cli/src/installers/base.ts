@@ -12,6 +12,7 @@ import crypto from 'crypto';
 import type { ProjectOptions, PackageManager } from './types.js';
 import { copyTemplate } from '../helpers/fileOperations.js';
 import { DEFAULT_THEME } from './string-utils.js';
+import { convertTweakCNToOKLCH } from '../utils/tweakcn-converter.js';
 
 /**
  * Abstract base class for framework-specific installers
@@ -52,8 +53,12 @@ export abstract class FrameworkInstaller {
    * Framework-specific file path for better-auth-ui config
    *
    * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
    */
-  abstract updateOAuthUIConfig(selectedProviders: string[]): Promise<void>;
+  abstract updateOAuthUIConfig(
+    selectedProviders: string[],
+    emailPasswordEnabled: boolean
+  ): Promise<void>;
 
   /**
    * Abstract method: Update .env.example with OAuth environment variables
@@ -97,19 +102,17 @@ export abstract class FrameworkInstaller {
 
   /**
    * Detect the package manager used to invoke the CLI
-   * Checks npm_config_user_agent environment variable
+   * Checks environment variables set by package managers
    *
-   * @returns Detected package manager, defaults to 'npm'
+   * @returns Detected package manager ('npm', 'yarn', 'pnpm', or 'bun')
    */
   protected detectPackageManager(): PackageManager {
-    const userAgent = process.env.npm_config_user_agent || '';
+    const userAgent = process.env.npm_config_user_agent;
 
-    if (userAgent.includes('pnpm')) {
-      return 'pnpm';
-    } else if (userAgent.includes('yarn')) {
-      return 'yarn';
-    } else if (userAgent.includes('bun')) {
-      return 'bun';
+    if (userAgent) {
+      if (userAgent.includes('pnpm')) return 'pnpm';
+      if (userAgent.includes('yarn')) return 'yarn';
+      if (userAgent.includes('bun')) return 'bun';
     }
 
     return 'npm';
@@ -117,7 +120,7 @@ export abstract class FrameworkInstaller {
 
   /**
    * Install project dependencies using detected package manager
-   * Shows progress with ora spinner
+   * Shows progress spinner during installation
    */
   protected async installDependencies(): Promise<void> {
     const packageManager = this.detectPackageManager();
@@ -129,9 +132,9 @@ export abstract class FrameworkInstaller {
         stdio: 'pipe',
       });
 
-      spinner.succeed(`Dependencies installed with ${packageManager}`);
+      spinner.succeed('Dependencies installed successfully');
     } catch (error) {
-      spinner.fail(`Failed to install dependencies with ${packageManager}`);
+      spinner.fail('Failed to install dependencies');
       throw new Error(
         `Dependency installation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -139,23 +142,72 @@ export abstract class FrameworkInstaller {
   }
 
   /**
-   * Format generated files using the project's format command
-   * Runs after all file modifications to ensure consistent code style
+   * Format code using project's formatter (Prettier via package.json script)
+   * Non-blocking - continues even if formatting fails
    */
   protected async formatCode(): Promise<void> {
     const packageManager = this.detectPackageManager();
-    const spinner = ora('Formatting generated files...').start();
+    const spinner = ora('Formatting code...').start();
 
     try {
-      await execa(packageManager, ['run', 'format'], {
+      const result = await execa(packageManager, ['run', 'format'], {
         cwd: this.targetPath,
         stdio: 'pipe',
+        reject: false,
       });
 
-      spinner.succeed('Code formatted successfully');
+      if (result.exitCode === 0) {
+        spinner.succeed('Code formatted successfully');
+      } else {
+        spinner.warn(`Formatting completed with warnings`);
+        if (result.stderr) {
+          console.log(result.stderr);
+        }
+      }
     } catch (error) {
       // Don't fail the entire installation if formatting fails
-      spinner.warn('Failed to format code (you may need to run `npm run format` manually)');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      spinner.warn(`Failed to format code: ${errorMessage}`);
+      console.log('You may need to run `npm run format` manually');
+    }
+  }
+
+  /**
+   * Lint and fix code using project's ESLint configuration
+   * Runs ESLint with --fix flag to auto-fix issues like import sorting
+   * Non-blocking - continues even if linting fails
+   */
+  protected async lintCode(): Promise<void> {
+    const packageManager = this.detectPackageManager();
+    const spinner = ora('Linting and fixing code...').start();
+
+    try {
+      // Build the command args based on package manager
+      // For pnpm: pnpm lint --fix
+      // For npm/yarn: npm run lint -- --fix
+      const args = packageManager === 'pnpm'
+        ? ['lint', '--fix']
+        : ['run', 'lint', '--', '--fix'];
+
+      const result = await execa(packageManager, args, {
+        cwd: this.targetPath,
+        stdio: 'pipe',
+        reject: false,
+      });
+
+      if (result.exitCode === 0) {
+        spinner.succeed('Code linted and fixed successfully');
+      } else {
+        spinner.warn(`Linting completed with warnings`);
+        if (result.stderr) {
+          console.log(result.stderr);
+        }
+      }
+    } catch (error) {
+      // Don't fail the entire installation if linting fails
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      spinner.warn(`Failed to lint code: ${errorMessage}`);
+      console.log('You may need to run `npm run lint -- --fix` manually');
     }
   }
 
@@ -252,13 +304,15 @@ export abstract class FrameworkInstaller {
   }
 
   /**
-   * Fetch TweakCN theme CSS from URL
+   * Fetch TweakCN theme CSS from URL and convert to OKLCH format
    * Handles network errors and provides retry suggestions
+   * Optionally converts fetched theme through OKLCH converter for consistent color format
    *
    * @param url - URL to fetch theme from
-   * @returns Theme CSS content
+   * @param convertToOklch - Whether to convert theme colors to OKLCH format (default: true)
+   * @returns Theme CSS content in OKLCH format (if conversion enabled)
    */
-  protected async fetchThemeFromUrl(url: string): Promise<string> {
+  protected async fetchThemeFromUrl(url: string, convertToOklch = true): Promise<string> {
     const spinner = ora('Fetching TweakCN theme...').start();
 
     try {
@@ -270,6 +324,27 @@ export abstract class FrameworkInstaller {
 
       const content = await response.text();
       spinner.succeed('TweakCN theme fetched');
+
+      // Optionally convert to OKLCH format using the TweakCN converter utility
+      if (convertToOklch) {
+        const convertSpinner = ora('Converting theme to OKLCH format...').start();
+        try {
+          // Use the converter utility to transform colors to OKLCH
+          const convertedContent = await convertTweakCNToOKLCH({
+            source: url,
+            format: 'oklch',
+          });
+          convertSpinner.succeed('Theme converted to OKLCH format');
+          return convertedContent;
+        } catch (convertError) {
+          // If conversion fails, fall back to raw content with warning
+          convertSpinner.warn('OKLCH conversion failed, using raw theme CSS');
+          console.warn(
+            `Warning: Failed to convert theme to OKLCH: ${convertError instanceof Error ? convertError.message : 'Unknown error'}`
+          );
+          return content;
+        }
+      }
 
       return content;
     } catch (error) {
@@ -298,22 +373,27 @@ export abstract class FrameworkInstaller {
       throw error;
     }
 
-    // Step 2: Configure OAuth providers and email/password auth (if any selected)
-    if (options.emailPasswordAuth || options.oauthProviders.length > 0) {
-      const authSpinner = ora('Configuring authentication...').start();
-      try {
-        await this.updateOAuthConfig(options.oauthProviders, options.emailPasswordAuth);
+    // Step 2: Configure OAuth providers and email/password auth (always call to handle placeholder removal)
+    const authSpinner = ora('Configuring authentication...').start();
+    try {
+      await this.updateOAuthConfig(options.oauthProviders, options.emailPasswordAuth);
+      if (options.emailPasswordAuth || options.oauthProviders.length > 0) {
         authSpinner.succeed('Authentication configuration updated');
-      } catch (error) {
-        authSpinner.fail('Failed to configure authentication');
-        throw error;
+      } else {
+        authSpinner.succeed('Authentication placeholders cleaned up');
       }
+    } catch (error) {
+      authSpinner.fail('Failed to configure authentication');
+      throw error;
     }
 
     // Step 3: Configure OAuth UI (always call to handle placeholder removal)
     const oauthUISpinner = ora('Configuring OAuth UI...').start();
     try {
-      await this.updateOAuthUIConfig(options.oauthProviders);
+      await this.updateOAuthUIConfig(
+        options.oauthProviders,
+        options.emailPasswordAuth
+      );
       if (options.oauthProviders.length > 0) {
         oauthUISpinner.succeed('OAuth UI configuration updated');
       } else {
@@ -338,7 +418,7 @@ export abstract class FrameworkInstaller {
       throw error;
     }
 
-    // Step 5: Update typed env configuration env.ts (always call to handle placeholder removal)
+    // Step 5: Update typed environment configuration (always call to handle placeholder removal)
     const envTsSpinner = ora('Updating typed env configuration...').start();
     try {
       await this.updateEnvTs(options.oauthProviders);
@@ -352,7 +432,7 @@ export abstract class FrameworkInstaller {
       throw error;
     }
 
-    // Step 6: Update README (always call to handle placeholder removal)
+    // Step 6: Update README with OAuth setup guides (always call to handle placeholder removal)
     const readmeSpinner = ora('Updating README...').start();
     try {
       await this.updateReadme(options.oauthProviders);
@@ -366,42 +446,48 @@ export abstract class FrameworkInstaller {
       throw error;
     }
 
-    // Step 7: Apply TweakCN theme (apply default if not provided)
+    // Step 7: Apply TweakCN theme or use default
     const themeSpinner = ora('Applying theme...').start();
     try {
       let themeContent: string;
 
       if (options.tweakcnTheme) {
-        // Fetch from URL if type is 'url'
         if (options.tweakcnTheme.type === 'url') {
+          // Fetch and convert theme from URL
           themeContent = await this.fetchThemeFromUrl(options.tweakcnTheme.content);
+        } else if (options.tweakcnTheme.type === 'css') {
+          // Use raw CSS content directly (no OKLCH conversion for inline CSS)
+          themeContent = options.tweakcnTheme.content;
         } else {
+          // Fallback for any unexpected type
           themeContent = options.tweakcnTheme.content;
         }
-      } else {
-        // Apply default theme when user skips
-        themeContent = DEFAULT_THEME;
-      }
 
-      await this.applyTweakCNTheme(themeContent);
-      themeSpinner.succeed(
-        options.tweakcnTheme ? 'TweakCN theme applied' : 'Default theme applied'
-      );
+        await this.applyTweakCNTheme(themeContent);
+        themeSpinner.succeed('TweakCN theme applied');
+      } else {
+        // Use default theme from string-utils.ts (already in OKLCH format)
+        await this.applyTweakCNTheme(DEFAULT_THEME);
+        themeSpinner.succeed('Default theme applied');
+      }
     } catch (error) {
       themeSpinner.fail('Failed to apply theme');
       throw error;
     }
 
-    // Step 8: Initialize Git repository (if selected)
+    // Step 8: Initialize Git repository (optional)
     if (options.initGit) {
       await this.initGitRepo();
     }
 
-    // Step 9: Install dependencies (if selected)
+    // Step 9: Install dependencies (optional)
     if (options.installDependencies) {
       await this.installDependencies();
 
-      // Step 10: Format code (only if dependencies were installed)
+      // Step 10: Lint and fix code (import sorting, etc.)
+      await this.lintCode();
+
+      // Step 11: Format code with Prettier
       await this.formatCode();
     }
   }

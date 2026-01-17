@@ -15,6 +15,7 @@ import {
   generateReadmeSection,
   generateEnvTsServerSchema,
   generateEnvTsRuntimeMapping,
+  generateCredentialsValue,
 } from './string-utils.js';
 
 /**
@@ -74,19 +75,31 @@ export class TanStackInstaller extends FrameworkInstaller {
   /**
    * Update OAuth UI configuration in providers file
    * Target file: src/providers.tsx
-   * Placeholder: // {{OAUTH_UI_PROVIDERS}}
+   * Placeholders: OAUTH_UI_PROVIDERS and EMAIL_PASSWORD_CREDENTIALS
    *
    * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
    */
-  async updateOAuthUIConfig(selectedProviders: string[]): Promise<void> {
+  async updateOAuthUIConfig(
+    selectedProviders: string[],
+    emailPasswordEnabled: boolean
+  ): Promise<void> {
     const providersFilePath = join(this.targetPath, 'src/providers.tsx');
-    const uiConfigBlock = generateOAuthUIProvidersBlock(selectedProviders);
 
-    // This will either add the social prop or remove the line entirely
+    // Replace OAuth UI providers list
+    const uiConfigBlock = generateOAuthUIProvidersBlock(selectedProviders);
     await replacePlaceholder(
       providersFilePath,
       '// {{OAUTH_UI_PROVIDERS}}',
       uiConfigBlock
+    );
+
+    // Replace credentials prop
+    const credentialsValue = generateCredentialsValue(emailPasswordEnabled);
+    await replacePlaceholder(
+      providersFilePath,
+      '/* {{EMAIL_PASSWORD_CREDENTIALS}} */',
+      credentialsValue
     );
   }
 

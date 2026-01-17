@@ -98,7 +98,7 @@ export default tseslint.config(
       "perfectionist/sort-named-imports": "warn",
       "perfectionist/sort-object-types": "warn",
       "perfectionist/sort-objects": [
-        "off",
+        "warn",
         {
           customGroups: [
             {

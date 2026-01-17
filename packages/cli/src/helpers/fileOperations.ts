@@ -55,13 +55,22 @@ export function getTargetDirectory(projectName: string, cwd: string): string {
  */
 export async function copyTemplate(framework: string, targetPath: string): Promise<void> {
   // Get the CLI's directory to locate templates
-  // __dirname will be the dist folder, so we go up one level to reach the CLI root
+  // When running from dist/index.js: __dirname will be dist/, so we go up one level
+  // When running from src/helpers/fileOperations.ts (tests): __dirname will be src/helpers/, so we go up two levels
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
 
   // Map framework value to template directory name
   const templateDir = framework === 'tanstack' ? 'tanstack-start' : 'nextjs';
-  const templatePath = join(__dirname, '../templates', templateDir);
+
+  // Try to find templates directory - check both possible locations
+  // First try: go up two levels (for src/helpers/ during tests)
+  let templatePath = join(__dirname, '../../templates', templateDir);
+
+  // If that doesn't exist, try going up one level (for dist/ in production)
+  if (!fs.existsSync(templatePath)) {
+    templatePath = join(__dirname, '../templates', templateDir);
+  }
 
   // Copy all files from template to target directory
   await fs.copy(templatePath, targetPath, {

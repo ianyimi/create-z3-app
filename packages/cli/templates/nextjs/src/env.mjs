@@ -29,6 +29,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CONVEX_SITE_URL: process.env.NEXT_PUBLIC_CONVEX_SITE_URL,
     NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
     NODE_ENV: process.env.NODE_ENV,
+    // {{OAUTH_ENV_RUNTIME_MAPPING}}
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -37,6 +38,7 @@ export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]),
+    // {{OAUTH_ENV_SERVER_SCHEMA}}
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

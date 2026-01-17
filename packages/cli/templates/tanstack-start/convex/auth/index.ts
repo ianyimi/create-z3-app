@@ -36,7 +36,7 @@ export const createAuth = (
     session: {
       modelName: TABLE_SLUG_SESSIONS
     },
-    trustedOrigins: [process.env.SITE_URL],
+    trustedOrigins: [process.env.SITE_URL!],
     user: {
       additionalFields: {
         role: {

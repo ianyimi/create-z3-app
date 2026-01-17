@@ -6,7 +6,7 @@ import { select, input, checkbox, confirm, Separator } from "@inquirer/prompts";
 import chalk2 from "chalk";
 import { readFileSync } from "fs";
 import { fileURLToPath as fileURLToPath2 } from "url";
-import { dirname as dirname2, join as join3 } from "path";
+import { dirname as dirname2, join as join4 } from "path";
 
 // src/utils/validation.ts
 import validateNpmPackageName from "validate-npm-package-name";
@@ -72,7 +72,10 @@ async function copyTemplate(framework, targetPath) {
   const __filename2 = fileURLToPath(import.meta.url);
   const __dirname2 = dirname(__filename2);
   const templateDir = framework === "tanstack" ? "tanstack-start" : "nextjs";
-  const templatePath = join(__dirname2, "../templates", templateDir);
+  let templatePath = join(__dirname2, "../../templates", templateDir);
+  if (!fs2.existsSync(templatePath)) {
+    templatePath = join(__dirname2, "../templates", templateDir);
+  }
   await fs2.copy(templatePath, targetPath, {
     overwrite: false,
     errorOnExist: false
@@ -144,8 +147,8 @@ var OAUTH_PROVIDERS = {
       import: "",
       clientSideProvider: '"google"',
       socialProvider: `google({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -189,8 +192,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"github"',
       socialProvider: `github({
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     })`,
       scopes: ["user:email"]
     },
@@ -235,8 +238,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"discord"',
       socialProvider: `discord({
-      clientId: process.env.DISCORD_CLIENT_ID as string,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
+      clientId: process.env.DISCORD_CLIENT_ID!,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -280,8 +283,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"apple"',
       socialProvider: `apple({
-      clientId: process.env.APPLE_CLIENT_ID as string,
-      clientSecret: process.env.APPLE_CLIENT_SECRET as string,
+      clientId: process.env.APPLE_CLIENT_ID!,
+      clientSecret: process.env.APPLE_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -328,8 +331,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"microsoft"',
       socialProvider: `microsoft({
-      clientId: process.env.MICROSOFT_CLIENT_ID as string,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET as string,
+      clientId: process.env.MICROSOFT_CLIENT_ID!,
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
       tenantId: process.env.MICROSOFT_TENANT_ID,
     })`,
       scopes: []
@@ -381,8 +384,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"facebook"',
       socialProvider: `facebook({
-      clientId: process.env.FACEBOOK_CLIENT_ID as string,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -427,8 +430,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"twitter"',
       socialProvider: `twitter({
-      clientId: process.env.TWITTER_CLIENT_ID as string,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
+      clientId: process.env.TWITTER_CLIENT_ID!,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -473,8 +476,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"linkedin"',
       socialProvider: `linkedin({
-      clientId: process.env.LINKEDIN_CLIENT_ID as string,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
+      clientId: process.env.LINKEDIN_CLIENT_ID!,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -519,8 +522,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"twitch"',
       socialProvider: `twitch({
-      clientId: process.env.TWITCH_CLIENT_ID as string,
-      clientSecret: process.env.TWITCH_CLIENT_SECRET as string,
+      clientId: process.env.TWITCH_CLIENT_ID!,
+      clientSecret: process.env.TWITCH_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -565,8 +568,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"spotify"',
       socialProvider: `spotify({
-      clientId: process.env.SPOTIFY_CLIENT_ID as string,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET as string,
+      clientId: process.env.SPOTIFY_CLIENT_ID!,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -613,8 +616,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"atlassian"',
       socialProvider: `atlassian({
-      clientId: process.env.ATLASSIAN_CLIENT_ID as string,
-      clientSecret: process.env.ATLASSIAN_CLIENT_SECRET as string,
+      clientId: process.env.ATLASSIAN_CLIENT_ID!,
+      clientSecret: process.env.ATLASSIAN_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -659,11 +662,11 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"cognito"',
       socialProvider: `cognito({
-      clientId: process.env.COGNITO_CLIENT_ID as string,
-      clientSecret: process.env.COGNITO_CLIENT_SECRET as string,
-      domain: process.env.COGNITO_DOMAIN as string,
-      region: process.env.COGNITO_REGION as string,
-      userPoolId: process.env.COGNITO_USER_POOL_ID as string,
+      clientId: process.env.COGNITO_CLIENT_ID!,
+      clientSecret: process.env.COGNITO_CLIENT_SECRET!,
+      domain: process.env.COGNITO_DOMAIN!,
+      region: process.env.COGNITO_REGION!,
+      userPoolId: process.env.COGNITO_USER_POOL_ID!,
     })`,
       scopes: []
     },
@@ -729,8 +732,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"dropbox"',
       socialProvider: `dropbox({
-      clientId: process.env.DROPBOX_CLIENT_ID as string,
-      clientSecret: process.env.DROPBOX_CLIENT_SECRET as string,
+      clientId: process.env.DROPBOX_CLIENT_ID!,
+      clientSecret: process.env.DROPBOX_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -775,9 +778,9 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"figma"',
       socialProvider: `figma({
-      clientId: process.env.FIGMA_CLIENT_ID as string,
-      clientSecret: process.env.FIGMA_CLIENT_SECRET as string,
-      clientKey: process.env.FIGMA_CLIENT_KEY as string,
+      clientId: process.env.FIGMA_CLIENT_ID!,
+      clientSecret: process.env.FIGMA_CLIENT_SECRET!,
+      clientKey: process.env.FIGMA_CLIENT_KEY!,
     })`,
       scopes: []
     },
@@ -827,8 +830,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"gitlab"',
       socialProvider: `gitlab({
-      clientId: process.env.GITLAB_CLIENT_ID as string,
-      clientSecret: process.env.GITLAB_CLIENT_SECRET as string,
+      clientId: process.env.GITLAB_CLIENT_ID!,
+      clientSecret: process.env.GITLAB_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -873,8 +876,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"huggingface"',
       socialProvider: `huggingface({
-      clientId: process.env.HUGGINGFACE_CLIENT_ID as string,
-      clientSecret: process.env.HUGGINGFACE_CLIENT_SECRET as string,
+      clientId: process.env.HUGGINGFACE_CLIENT_ID!,
+      clientSecret: process.env.HUGGINGFACE_CLIENT_SECRET!,
     })`,
       scopes: ["email"]
     },
@@ -919,8 +922,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"kakao"',
       socialProvider: `kakao({
-      clientId: process.env.KAKAO_CLIENT_ID as string,
-      clientSecret: process.env.KAKAO_CLIENT_SECRET as string,
+      clientId: process.env.KAKAO_CLIENT_ID!,
+      clientSecret: process.env.KAKAO_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -965,8 +968,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"kick"',
       socialProvider: `kick({
-      clientId: process.env.KICK_CLIENT_ID as string,
-      clientSecret: process.env.KICK_CLIENT_SECRET as string,
+      clientId: process.env.KICK_CLIENT_ID!,
+      clientSecret: process.env.KICK_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1011,8 +1014,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"line"',
       socialProvider: `line({
-      clientId: process.env.LINE_CLIENT_ID as string,
-      clientSecret: process.env.LINE_CLIENT_SECRET as string,
+      clientId: process.env.LINE_CLIENT_ID!,
+      clientSecret: process.env.LINE_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1057,8 +1060,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"linear"',
       socialProvider: `linear({
-      clientId: process.env.LINEAR_CLIENT_ID as string,
-      clientSecret: process.env.LINEAR_CLIENT_SECRET as string,
+      clientId: process.env.LINEAR_CLIENT_ID!,
+      clientSecret: process.env.LINEAR_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1102,8 +1105,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"naver"',
       socialProvider: `naver({
-      clientId: process.env.NAVER_CLIENT_ID as string,
-      clientSecret: process.env.NAVER_CLIENT_SECRET as string,
+      clientId: process.env.NAVER_CLIENT_ID!,
+      clientSecret: process.env.NAVER_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1148,8 +1151,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"notion"',
       socialProvider: `notion({
-      clientId: process.env.NOTION_CLIENT_ID as string,
-      clientSecret: process.env.NOTION_CLIENT_SECRET as string,
+      clientId: process.env.NOTION_CLIENT_ID!,
+      clientSecret: process.env.NOTION_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1194,8 +1197,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"paybin"',
       socialProvider: `paybin({
-      clientId: process.env.PAYBIN_CLIENT_ID as string,
-      clientSecret: process.env.PAYBIN_CLIENT_SECRET as string,
+      clientId: process.env.PAYBIN_CLIENT_ID!,
+      clientSecret: process.env.PAYBIN_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1240,8 +1243,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"paypal"',
       socialProvider: `paypal({
-      clientId: process.env.PAYPAL_CLIENT_ID as string,
-      clientSecret: process.env.PAYPAL_CLIENT_SECRET as string,
+      clientId: process.env.PAYPAL_CLIENT_ID!,
+      clientSecret: process.env.PAYPAL_CLIENT_SECRET!,
       environment: process.env.PAYPAL_ENVIRONMENT || "sandbox",
     })`,
       scopes: []
@@ -1293,8 +1296,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"polar"',
       socialProvider: `polar({
-      clientId: process.env.POLAR_CLIENT_ID as string,
-      clientSecret: process.env.POLAR_CLIENT_SECRET as string,
+      clientId: process.env.POLAR_CLIENT_ID!,
+      clientSecret: process.env.POLAR_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1339,8 +1342,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"reddit"',
       socialProvider: `reddit({
-      clientId: process.env.REDDIT_CLIENT_ID as string,
-      clientSecret: process.env.REDDIT_CLIENT_SECRET as string,
+      clientId: process.env.REDDIT_CLIENT_ID!,
+      clientSecret: process.env.REDDIT_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1385,8 +1388,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"roblox"',
       socialProvider: `roblox({
-      clientId: process.env.ROBLOX_CLIENT_ID as string,
-      clientSecret: process.env.ROBLOX_CLIENT_SECRET as string,
+      clientId: process.env.ROBLOX_CLIENT_ID!,
+      clientSecret: process.env.ROBLOX_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1433,8 +1436,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"salesforce"',
       socialProvider: `salesforce({
-      clientId: process.env.SALESFORCE_CLIENT_ID as string,
-      clientSecret: process.env.SALESFORCE_CLIENT_SECRET as string,
+      clientId: process.env.SALESFORCE_CLIENT_ID!,
+      clientSecret: process.env.SALESFORCE_CLIENT_SECRET!,
       environment: process.env.SALESFORCE_ENVIRONMENT || "login",
     })`,
       scopes: []
@@ -1486,8 +1489,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"slack"',
       socialProvider: `slack({
-      clientId: process.env.SLACK_CLIENT_ID as string,
-      clientSecret: process.env.SLACK_CLIENT_SECRET as string,
+      clientId: process.env.SLACK_CLIENT_ID!,
+      clientSecret: process.env.SLACK_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1532,8 +1535,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"tiktok"',
       socialProvider: `tiktok({
-      clientKey: process.env.TIKTOK_CLIENT_KEY as string,
-      clientSecret: process.env.TIKTOK_CLIENT_SECRET as string,
+      clientKey: process.env.TIKTOK_CLIENT_KEY!,
+      clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1580,8 +1583,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"vercel"',
       socialProvider: `vercel({
-      clientId: process.env.VERCEL_CLIENT_ID as string,
-      clientSecret: process.env.VERCEL_CLIENT_SECRET as string,
+      clientId: process.env.VERCEL_CLIENT_ID!,
+      clientSecret: process.env.VERCEL_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1626,8 +1629,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"vk"',
       socialProvider: `vk({
-      clientId: process.env.VK_CLIENT_ID as string,
-      clientSecret: process.env.VK_CLIENT_SECRET as string,
+      clientId: process.env.VK_CLIENT_ID!,
+      clientSecret: process.env.VK_CLIENT_SECRET!,
     })`,
       scopes: []
     },
@@ -1672,8 +1675,8 @@ For more details, see the [Better Auth documentation](https://www.better-auth.co
       import: "",
       clientSideProvider: '"zoom"',
       socialProvider: `zoom({
-      clientId: process.env.ZOOM_CLIENT_ID as string,
-      clientSecret: process.env.ZOOM_CLIENT_SECRET as string,
+      clientId: process.env.ZOOM_CLIENT_ID!,
+      clientSecret: process.env.ZOOM_CLIENT_SECRET!,
     })`,
       scopes: ["user:read:user"]
     },
@@ -1725,25 +1728,25 @@ function getAdditionalProviders() {
 
 // src/installers/string-utils.ts
 import fs3 from "fs-extra";
-var DEFAULT_THEME = `--background: 0 0% 100%;
---foreground: 240 10% 3.9%;
---card: 0 0% 100%;
---card-foreground: 240 10% 3.9%;
---popover: 0 0% 100%;
---popover-foreground: 240 10% 3.9%;
---primary: 240 5.9% 10%;
---primary-foreground: 0 0% 98%;
---secondary: 240 4.8% 95.9%;
---secondary-foreground: 240 5.9% 10%;
---muted: 240 4.8% 95.9%;
---muted-foreground: 240 3.8% 46.1%;
---accent: 240 4.8% 95.9%;
---accent-foreground: 240 5.9% 10%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 0 0% 98%;
---border: 240 5.9% 90%;
---input: 240 5.9% 90%;
---ring: 240 5.9% 10%;
+var DEFAULT_THEME = `--background: 100% 0.000 0;
+--foreground: 3.9% 0.006 240;
+--card: 100% 0.000 0;
+--card-foreground: 3.9% 0.006 240;
+--popover: 100% 0.000 0;
+--popover-foreground: 3.9% 0.006 240;
+--primary: 10% 0.003 240;
+--primary-foreground: 98% 0.000 0;
+--secondary: 95.9% 0.002 240;
+--secondary-foreground: 10% 0.003 240;
+--muted: 95.9% 0.002 240;
+--muted-foreground: 46.1% 0.002 240;
+--accent: 95.9% 0.002 240;
+--accent-foreground: 10% 0.003 240;
+--destructive: 60.2% 0.168 0;
+--destructive-foreground: 98% 0.000 0;
+--border: 90% 0.003 240;
+--input: 90% 0.003 240;
+--ring: 10% 0.003 240;
 --radius: 0.5rem;`;
 function detectIndentation(line) {
   const match = line.match(/^(\s*)/);
@@ -1761,6 +1764,11 @@ async function replacePlaceholder(filePath, placeholder, content, options) {
     throw new Error(
       `Placeholder "${placeholder}" not found in file: ${filePath}`
     );
+  }
+  if (options?.inline) {
+    const updatedContent = fileContent.replace(placeholder, content);
+    await fs3.writeFile(filePath, updatedContent, "utf-8");
+    return;
   }
   const lines = fileContent.split("\n");
   const updatedLines = [];
@@ -1783,13 +1791,14 @@ async function replacePlaceholder(filePath, placeholder, content, options) {
   }
   await fs3.writeFile(filePath, updatedLines.join("\n"), "utf-8");
 }
+function generateCredentialsValue(enabled) {
+  return `credentials={${enabled}}`;
+}
 function generateAuthProvidersBlock(oauthProviders, emailPasswordEnabled) {
   const parts = [];
-  if (emailPasswordEnabled) {
-    parts.push(`emailAndPassword: {
-      enabled: true
+  parts.push(`emailAndPassword: {
+      enabled: ${emailPasswordEnabled}
     },`);
-  }
   if (oauthProviders.length > 0) {
     const providersObject = oauthProviders.map((providerId) => {
       const provider = getProvider(providerId);
@@ -1797,11 +1806,11 @@ function generateAuthProvidersBlock(oauthProviders, emailPasswordEnabled) {
         throw new Error(`Unknown OAuth provider: ${providerId}`);
       }
       const configLines = [
-        `clientId: process.env.${provider.envPrefix}_CLIENT_ID as string,`,
-        `clientSecret: process.env.${provider.envPrefix}_CLIENT_SECRET as string,`
+        `clientId: process.env.${provider.envPrefix}_CLIENT_ID!,`,
+        `clientSecret: process.env.${provider.envPrefix}_CLIENT_SECRET!,`
       ];
       if (providerId === "figma") {
-        configLines.push(`clientKey: process.env.FIGMA_CLIENT_KEY as string,`);
+        configLines.push(`clientKey: process.env.FIGMA_CLIENT_KEY!,`);
       }
       return `${providerId}: {
         ${configLines.join("\n        ")}
@@ -1853,7 +1862,7 @@ function generateEnvTsRuntimeMapping(providers) {
 }
 function generateOAuthUIProvidersBlock(providers) {
   if (providers.length === 0) {
-    return "__REMOVE_SOCIAL_PROP__";
+    return "";
   }
   const providerList = providers.map((id) => `"${id}"`).join(", ");
   return `social={{
@@ -1927,6 +1936,129 @@ import { join as join2 } from "path";
 import { execa } from "execa";
 import ora from "ora";
 import crypto from "crypto";
+
+// src/utils/tweakcn-converter.ts
+import fs4 from "fs-extra";
+import convert from "color-convert";
+async function convertTweakCNToOKLCH(options) {
+  const { source, format = "oklch" } = options;
+  const cssContent = await fetchOrReadCSS(source);
+  const colors = parseColorsFromCSS(cssContent);
+  const convertedColors = colors.map((color) => ({
+    ...color,
+    oklch: convertColorToOKLCH(color.value)
+  }));
+  return generateCSSOutput(convertedColors, format);
+}
+async function fetchOrReadCSS(source) {
+  if (source.startsWith("http://") || source.startsWith("https://")) {
+    try {
+      const response = await fetch(source);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return await response.text();
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch CSS from URL: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+  }
+  try {
+    return await fs4.readFile(source, "utf-8");
+  } catch (error) {
+    throw new Error(
+      `Failed to read CSS from file: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+function parseColorsFromCSS(css) {
+  const colors = [];
+  const cssVarRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+  let match;
+  while ((match = cssVarRegex.exec(css)) !== null) {
+    const name = `--${match[1]}`;
+    const value = match[2].trim();
+    if (isColorValue(value)) {
+      colors.push({ name, value });
+    }
+  }
+  return colors;
+}
+function isColorValue(value) {
+  if (value.startsWith("#")) {
+    return true;
+  }
+  if (value.startsWith("rgb(") || value.startsWith("rgba(")) {
+    return true;
+  }
+  if (value.startsWith("hsl(") || value.startsWith("hsla(")) {
+    return true;
+  }
+  if (value.startsWith("oklch(")) {
+    return true;
+  }
+  if (/^\d+(\.\d+)?\s+\d+(\.\d+)?%\s+\d+(\.\d+)?%$/.test(value)) {
+    return true;
+  }
+  return false;
+}
+function convertColorToOKLCH(colorValue) {
+  const trimmed = colorValue.trim();
+  if (trimmed.startsWith("oklch(")) {
+    const match = trimmed.match(/oklch\(([\d.]+%?)\s+([\d.]+)\s+([\d.]+)\)/);
+    if (match) {
+      return `${match[1]} ${match[2]} ${match[3]}`;
+    }
+  }
+  let rgb;
+  try {
+    if (trimmed.startsWith("#")) {
+      rgb = convert.hex.rgb(trimmed.slice(1));
+    } else if (trimmed.startsWith("rgb(") || trimmed.startsWith("rgba(")) {
+      const match = trimmed.match(/rgba?\((\d+),?\s*(\d+),?\s*(\d+)/);
+      if (!match) throw new Error("Invalid RGB format");
+      rgb = [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
+    } else if (trimmed.startsWith("hsl(") || trimmed.startsWith("hsla(")) {
+      const match = trimmed.match(/hsla?\((\d+),?\s*(\d+)%?,?\s*(\d+)%?/);
+      if (!match) throw new Error("Invalid HSL format");
+      const hsl2 = [
+        parseInt(match[1]),
+        parseInt(match[2]),
+        parseInt(match[3])
+      ];
+      rgb = convert.hsl.rgb(hsl2);
+    } else if (/^\d+(\.\d+)?\s+\d+(\.\d+)?%\s+\d+(\.\d+)?%$/.test(trimmed)) {
+      const parts = trimmed.split(/\s+/);
+      const h2 = parseFloat(parts[0]);
+      const s = parseFloat(parts[1].replace("%", ""));
+      const l2 = parseFloat(parts[2].replace("%", ""));
+      rgb = convert.hsl.rgb([h2, s, l2]);
+    } else {
+      return trimmed;
+    }
+    const hsl = convert.rgb.hsl(rgb);
+    const l = hsl[2];
+    const c = hsl[1] / 100 * 0.4;
+    const h = hsl[0];
+    return `${l}% ${c.toFixed(3)} ${h}`;
+  } catch (error) {
+    console.warn(`Failed to convert color "${colorValue}": ${error instanceof Error ? error.message : "Unknown error"}`);
+    return trimmed;
+  }
+}
+function generateCSSOutput(colors, format) {
+  if (colors.length === 0) {
+    return "";
+  }
+  const declarations = colors.map((color) => {
+    const value = format === "oklch" && color.oklch ? color.oklch : color.value;
+    return `${color.name}: ${value};`;
+  }).join("\n");
+  return declarations;
+}
+
+// src/installers/base.ts
 var FrameworkInstaller = class {
   /**
    * Constructor for FrameworkInstaller
@@ -1947,24 +2079,22 @@ var FrameworkInstaller = class {
   }
   /**
    * Detect the package manager used to invoke the CLI
-   * Checks npm_config_user_agent environment variable
+   * Checks environment variables set by package managers
    *
-   * @returns Detected package manager, defaults to 'npm'
+   * @returns Detected package manager ('npm', 'yarn', 'pnpm', or 'bun')
    */
   detectPackageManager() {
-    const userAgent = process.env.npm_config_user_agent || "";
-    if (userAgent.includes("pnpm")) {
-      return "pnpm";
-    } else if (userAgent.includes("yarn")) {
-      return "yarn";
-    } else if (userAgent.includes("bun")) {
-      return "bun";
+    const userAgent = process.env.npm_config_user_agent;
+    if (userAgent) {
+      if (userAgent.includes("pnpm")) return "pnpm";
+      if (userAgent.includes("yarn")) return "yarn";
+      if (userAgent.includes("bun")) return "bun";
     }
     return "npm";
   }
   /**
    * Install project dependencies using detected package manager
-   * Shows progress with ora spinner
+   * Shows progress spinner during installation
    */
   async installDependencies() {
     const packageManager = this.detectPackageManager();
@@ -1974,29 +2104,68 @@ var FrameworkInstaller = class {
         cwd: this.targetPath,
         stdio: "pipe"
       });
-      spinner.succeed(`Dependencies installed with ${packageManager}`);
+      spinner.succeed("Dependencies installed successfully");
     } catch (error) {
-      spinner.fail(`Failed to install dependencies with ${packageManager}`);
+      spinner.fail("Failed to install dependencies");
       throw new Error(
         `Dependency installation failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
   /**
-   * Format generated files using the project's format command
-   * Runs after all file modifications to ensure consistent code style
+   * Format code using project's formatter (Prettier via package.json script)
+   * Non-blocking - continues even if formatting fails
    */
   async formatCode() {
     const packageManager = this.detectPackageManager();
-    const spinner = ora("Formatting generated files...").start();
+    const spinner = ora("Formatting code...").start();
     try {
-      await execa(packageManager, ["run", "format"], {
+      const result = await execa(packageManager, ["run", "format"], {
         cwd: this.targetPath,
-        stdio: "pipe"
+        stdio: "pipe",
+        reject: false
       });
-      spinner.succeed("Code formatted successfully");
+      if (result.exitCode === 0) {
+        spinner.succeed("Code formatted successfully");
+      } else {
+        spinner.warn(`Formatting completed with warnings`);
+        if (result.stderr) {
+          console.log(result.stderr);
+        }
+      }
     } catch (error) {
-      spinner.warn("Failed to format code (you may need to run `npm run format` manually)");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      spinner.warn(`Failed to format code: ${errorMessage}`);
+      console.log("You may need to run `npm run format` manually");
+    }
+  }
+  /**
+   * Lint and fix code using project's ESLint configuration
+   * Runs ESLint with --fix flag to auto-fix issues like import sorting
+   * Non-blocking - continues even if linting fails
+   */
+  async lintCode() {
+    const packageManager = this.detectPackageManager();
+    const spinner = ora("Linting and fixing code...").start();
+    try {
+      const args = packageManager === "pnpm" ? ["lint", "--fix"] : ["run", "lint", "--", "--fix"];
+      const result = await execa(packageManager, args, {
+        cwd: this.targetPath,
+        stdio: "pipe",
+        reject: false
+      });
+      if (result.exitCode === 0) {
+        spinner.succeed("Code linted and fixed successfully");
+      } else {
+        spinner.warn(`Linting completed with warnings`);
+        if (result.stderr) {
+          console.log(result.stderr);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      spinner.warn(`Failed to lint code: ${errorMessage}`);
+      console.log("You may need to run `npm run lint -- --fix` manually");
     }
   }
   /**
@@ -2072,13 +2241,15 @@ Make sure you are authenticated with GitHub CLI (run "gh auth login")`
     return crypto.randomBytes(32).toString("hex");
   }
   /**
-   * Fetch TweakCN theme CSS from URL
+   * Fetch TweakCN theme CSS from URL and convert to OKLCH format
    * Handles network errors and provides retry suggestions
+   * Optionally converts fetched theme through OKLCH converter for consistent color format
    *
    * @param url - URL to fetch theme from
-   * @returns Theme CSS content
+   * @param convertToOklch - Whether to convert theme colors to OKLCH format (default: true)
+   * @returns Theme CSS content in OKLCH format (if conversion enabled)
    */
-  async fetchThemeFromUrl(url) {
+  async fetchThemeFromUrl(url, convertToOklch = true) {
     const spinner = ora("Fetching TweakCN theme...").start();
     try {
       const response = await fetch(url);
@@ -2087,6 +2258,23 @@ Make sure you are authenticated with GitHub CLI (run "gh auth login")`
       }
       const content = await response.text();
       spinner.succeed("TweakCN theme fetched");
+      if (convertToOklch) {
+        const convertSpinner = ora("Converting theme to OKLCH format...").start();
+        try {
+          const convertedContent = await convertTweakCNToOKLCH({
+            source: url,
+            format: "oklch"
+          });
+          convertSpinner.succeed("Theme converted to OKLCH format");
+          return convertedContent;
+        } catch (convertError) {
+          convertSpinner.warn("OKLCH conversion failed, using raw theme CSS");
+          console.warn(
+            `Warning: Failed to convert theme to OKLCH: ${convertError instanceof Error ? convertError.message : "Unknown error"}`
+          );
+          return content;
+        }
+      }
       return content;
     } catch (error) {
       spinner.fail("Failed to fetch TweakCN theme");
@@ -2111,19 +2299,24 @@ Please check the URL and your internet connection, then try again.`
       copySpinner.fail("Failed to copy template files");
       throw error;
     }
-    if (options.emailPasswordAuth || options.oauthProviders.length > 0) {
-      const authSpinner = ora("Configuring authentication...").start();
-      try {
-        await this.updateOAuthConfig(options.oauthProviders, options.emailPasswordAuth);
+    const authSpinner = ora("Configuring authentication...").start();
+    try {
+      await this.updateOAuthConfig(options.oauthProviders, options.emailPasswordAuth);
+      if (options.emailPasswordAuth || options.oauthProviders.length > 0) {
         authSpinner.succeed("Authentication configuration updated");
-      } catch (error) {
-        authSpinner.fail("Failed to configure authentication");
-        throw error;
+      } else {
+        authSpinner.succeed("Authentication placeholders cleaned up");
       }
+    } catch (error) {
+      authSpinner.fail("Failed to configure authentication");
+      throw error;
     }
     const oauthUISpinner = ora("Configuring OAuth UI...").start();
     try {
-      await this.updateOAuthUIConfig(options.oauthProviders);
+      await this.updateOAuthUIConfig(
+        options.oauthProviders,
+        options.emailPasswordAuth
+      );
       if (options.oauthProviders.length > 0) {
         oauthUISpinner.succeed("OAuth UI configuration updated");
       } else {
@@ -2175,16 +2368,17 @@ Please check the URL and your internet connection, then try again.`
       if (options.tweakcnTheme) {
         if (options.tweakcnTheme.type === "url") {
           themeContent = await this.fetchThemeFromUrl(options.tweakcnTheme.content);
+        } else if (options.tweakcnTheme.type === "css") {
+          themeContent = options.tweakcnTheme.content;
         } else {
           themeContent = options.tweakcnTheme.content;
         }
+        await this.applyTweakCNTheme(themeContent);
+        themeSpinner.succeed("TweakCN theme applied");
       } else {
-        themeContent = DEFAULT_THEME;
+        await this.applyTweakCNTheme(DEFAULT_THEME);
+        themeSpinner.succeed("Default theme applied");
       }
-      await this.applyTweakCNTheme(themeContent);
-      themeSpinner.succeed(
-        options.tweakcnTheme ? "TweakCN theme applied" : "Default theme applied"
-      );
     } catch (error) {
       themeSpinner.fail("Failed to apply theme");
       throw error;
@@ -2194,6 +2388,7 @@ Please check the URL and your internet connection, then try again.`
     }
     if (options.installDependencies) {
       await this.installDependencies();
+      await this.lintCode();
       await this.formatCode();
     }
   }
@@ -2236,17 +2431,24 @@ var TanStackInstaller = class extends FrameworkInstaller {
   /**
    * Update OAuth UI configuration in providers file
    * Target file: src/providers.tsx
-   * Placeholder: // {{OAUTH_UI_PROVIDERS}}
+   * Placeholders: OAUTH_UI_PROVIDERS and EMAIL_PASSWORD_CREDENTIALS
    *
    * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
    */
-  async updateOAuthUIConfig(selectedProviders) {
+  async updateOAuthUIConfig(selectedProviders, emailPasswordEnabled) {
     const providersFilePath = join2(this.targetPath, "src/providers.tsx");
     const uiConfigBlock = generateOAuthUIProvidersBlock(selectedProviders);
     await replacePlaceholder(
       providersFilePath,
       "// {{OAUTH_UI_PROVIDERS}}",
       uiConfigBlock
+    );
+    const credentialsValue = generateCredentialsValue(emailPasswordEnabled);
+    await replacePlaceholder(
+      providersFilePath,
+      "/* {{EMAIL_PASSWORD_CREDENTIALS}} */",
+      credentialsValue
     );
   }
   /**
@@ -2328,11 +2530,144 @@ var TanStackInstaller = class extends FrameworkInstaller {
   }
 };
 
+// src/installers/nextjs.ts
+import { join as join3 } from "path";
+var NextJSInstaller = class extends FrameworkInstaller {
+  /**
+   * Framework identifier for Next.js
+   */
+  get frameworkName() {
+    return "nextjs";
+  }
+  /**
+   * Update OAuth configuration in Convex auth file
+   * Target file: convex/auth/index.ts (SAME as TanStack)
+   * Placeholders: // {{EMAIL_PASSWORD_AUTH}} and // {{OAUTH_PROVIDERS}}
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
+   */
+  async updateOAuthConfig(selectedProviders, emailPasswordEnabled) {
+    const authFilePath = join3(this.targetPath, "convex/auth/index.ts");
+    const authProvidersBlock = generateAuthProvidersBlock(
+      selectedProviders,
+      emailPasswordEnabled
+    );
+    await replacePlaceholder(
+      authFilePath,
+      "// {{OAUTH_PROVIDERS}}",
+      authProvidersBlock
+    );
+    await replacePlaceholder(
+      authFilePath,
+      "// {{EMAIL_PASSWORD_AUTH}}",
+      "",
+      { graceful: true }
+    );
+  }
+  /**
+   * Update OAuth UI configuration in auth client file
+   * Target file: src/auth/client.tsx (DIFFERENT from TanStack: src/providers.tsx)
+   * Placeholders: OAUTH_UI_PROVIDERS and EMAIL_PASSWORD_CREDENTIALS
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   * @param emailPasswordEnabled - Whether email/password authentication is enabled
+   */
+  async updateOAuthUIConfig(selectedProviders, emailPasswordEnabled) {
+    const providersFilePath = join3(this.targetPath, "src/auth/client.tsx");
+    const uiConfigBlock = generateOAuthUIProvidersBlock(selectedProviders);
+    await replacePlaceholder(
+      providersFilePath,
+      "// {{OAUTH_UI_PROVIDERS}}",
+      uiConfigBlock
+    );
+    const credentialsValue = generateCredentialsValue(emailPasswordEnabled);
+    await replacePlaceholder(
+      providersFilePath,
+      "/* {{EMAIL_PASSWORD_CREDENTIALS}} */",
+      credentialsValue
+    );
+  }
+  /**
+   * Update .env.example with OAuth environment variables
+   * Target file: .env.example (SAME as TanStack)
+   * Placeholder: # {{ENV_OAUTH_VARS}}
+   * Applies NEXT_PUBLIC_ prefix for client-side variables (DIFFERENT parameter from TanStack)
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   */
+  async updateEnvExample(selectedProviders) {
+    const envFilePath = join3(this.targetPath, ".env.example");
+    const envVarsBlock = generateEnvVarsBlock(selectedProviders, "nextjs");
+    await replacePlaceholder(
+      envFilePath,
+      "# {{ENV_OAUTH_VARS}}",
+      envVarsBlock
+    );
+  }
+  /**
+   * Update README with OAuth provider setup guides
+   * Target file: README.md (SAME as TanStack)
+   * Placeholder: <!-- {{OAUTH_SETUP_GUIDE}} -->
+   * Handles missing placeholder gracefully with warning
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   */
+  async updateReadme(selectedProviders) {
+    const readmeFilePath = join3(this.targetPath, "README.md");
+    const readmeSection = generateReadmeSection(selectedProviders);
+    await replacePlaceholder(
+      readmeFilePath,
+      "<!-- {{OAUTH_SETUP_GUIDE}} -->",
+      readmeSection,
+      { graceful: true }
+    );
+  }
+  /**
+   * Apply TweakCN theme to global CSS file
+   * Target file: src/app/(frontend)/globals.css (DIFFERENT from TanStack: src/styles/globals.css)
+   * Placeholder: CSS comment with TWEAKCN_THEME variable
+   *
+   * @param themeContent - CSS content to apply
+   */
+  async applyTweakCNTheme(themeContent) {
+    const cssFilePath = join3(this.targetPath, "src/app/(frontend)/globals.css");
+    await replacePlaceholder(
+      cssFilePath,
+      "/* {{TWEAKCN_THEME}} */",
+      themeContent
+    );
+  }
+  /**
+   * Update env.mjs with OAuth provider environment variables
+   * Target file: src/env.mjs (DIFFERENT from TanStack: src/env.ts - Next.js uses env.mjs)
+   * Placeholders: // {{OAUTH_ENV_SERVER_SCHEMA}} and // {{OAUTH_ENV_RUNTIME_MAPPING}}
+   * Adds zod schema validation and runtime mappings for OAuth credentials
+   *
+   * @param selectedProviders - Array of provider IDs to configure
+   */
+  async updateEnvTs(selectedProviders) {
+    const envFilePath = join3(this.targetPath, "src/env.mjs");
+    const serverSchema = generateEnvTsServerSchema(selectedProviders);
+    await replacePlaceholder(
+      envFilePath,
+      "// {{OAUTH_ENV_SERVER_SCHEMA}}",
+      serverSchema
+    );
+    const runtimeMapping = generateEnvTsRuntimeMapping(selectedProviders);
+    await replacePlaceholder(
+      envFilePath,
+      "// {{OAUTH_ENV_RUNTIME_MAPPING}}",
+      runtimeMapping
+    );
+  }
+};
+
 // src/index.ts
 var __filename = fileURLToPath2(import.meta.url);
 var __dirname = dirname2(__filename);
 var packageJson = JSON.parse(
-  readFileSync(join3(__dirname, "../package.json"), "utf-8")
+  readFileSync(join4(__dirname, "../package.json"), "utf-8")
 );
 var program = new Command();
 async function promptOAuthProviders() {
@@ -2488,7 +2823,7 @@ program.name("create-z3").version(packageJson.version).description("CLI for scaf
     if (framework === "tanstack") {
       installer = new TanStackInstaller(createdPath, projectName);
     } else {
-      throw new Error("Next.js installer not yet implemented. Please use TanStack Start.");
+      installer = new NextJSInstaller(createdPath, projectName);
     }
     try {
       await installer.initProject(projectOptions);
