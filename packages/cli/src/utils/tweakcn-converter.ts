@@ -32,6 +32,14 @@ interface ColorValue {
 }
 
 /**
+ * Extended color value with theme context
+ */
+interface ColorValueWithTheme extends ColorValue {
+  /** Theme context: 'root' for :root block, 'dark' for .dark block */
+  theme?: 'root' | 'dark';
+}
+
+/**
  * Converts TweakCN theme CSS to OKLCH color format
  *
  * This function:
@@ -118,24 +126,41 @@ async function fetchOrReadCSS(source: string): Promise<string> {
  * - :root blocks (light theme)
  * - .dark blocks (dark theme)
  *
+ * Preserves theme context for proper reconstruction
+ *
  * @param css - CSS content to parse
- * @returns Array of parsed color values
+ * @returns Array of parsed color values with theme context
  */
-function parseColorsFromCSS(css: string): ColorValue[] {
-  const colors: ColorValue[] = [];
+function parseColorsFromCSS(css: string): ColorValueWithTheme[] {
+  const colors: ColorValueWithTheme[] = [];
 
-  // Regular expression to match CSS custom properties with color values
-  // Matches: --variable-name: value;
-  const cssVarRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+  // Match :root { ... } blocks
+  const rootBlockRegex = /:root\s*\{([^}]+)\}/gs;
+  const rootMatch = rootBlockRegex.exec(css);
+  if (rootMatch) {
+    const rootContent = rootMatch[1];
+    const cssVarRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+    let match;
+    while ((match = cssVarRegex.exec(rootContent)) !== null) {
+      const name = `--${match[1]}`;
+      const value = match[2].trim();
+      // Include ALL properties, not just colors, to preserve complete theme
+      colors.push({ name, value, theme: 'root' });
+    }
+  }
 
-  let match;
-  while ((match = cssVarRegex.exec(css)) !== null) {
-    const name = `--${match[1]}`;
-    const value = match[2].trim();
-
-    // Only process if value looks like a color (not radius, etc.)
-    if (isColorValue(value)) {
-      colors.push({ name, value });
+  // Match .dark { ... } blocks
+  const darkBlockRegex = /\.dark\s*\{([^}]+)\}/gs;
+  const darkMatch = darkBlockRegex.exec(css);
+  if (darkMatch) {
+    const darkContent = darkMatch[1];
+    const cssVarRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
+    let match;
+    while ((match = cssVarRegex.exec(darkContent)) !== null) {
+      const name = `--${match[1]}`;
+      const value = match[2].trim();
+      // Include ALL properties to preserve complete theme
+      colors.push({ name, value, theme: 'dark' });
     }
   }
 
@@ -269,29 +294,54 @@ function convertColorToOKLCH(colorValue: string): string {
 /**
  * Generates formatted CSS output with converted color variables
  *
- * @param colors - Array of colors with OKLCH conversions
+ * Reconstructs :root and .dark blocks with proper structure
+ *
+ * @param colors - Array of colors with OKLCH conversions and theme context
  * @param format - Output format (currently only 'oklch' supported)
- * @returns Formatted CSS string
+ * @returns Formatted CSS string with :root and .dark blocks
  */
 function generateCSSOutput(
-  colors: ColorValue[],
+  colors: ColorValueWithTheme[],
   format: 'oklch' | 'rgb' | 'hsl'
 ): string {
   if (colors.length === 0) {
     return '';
   }
 
-  // Generate CSS custom property declarations
-  const declarations = colors
-    .map(color => {
-      const value = format === 'oklch' && color.oklch
-        ? color.oklch
-        : color.value;
-      return `${color.name}: ${value};`;
-    })
-    .join('\n');
+  // Separate colors by theme
+  const rootColors = colors.filter(c => c.theme === 'root');
+  const darkColors = colors.filter(c => c.theme === 'dark');
 
-  return declarations;
+  let output = '';
+
+  // Generate :root block
+  if (rootColors.length > 0) {
+    const rootDeclarations = rootColors
+      .map(color => {
+        const value = format === 'oklch' && color.oklch && isColorValue(color.value)
+          ? color.oklch
+          : color.value;
+        return `  ${color.name}: ${value};`;
+      })
+      .join('\n');
+    output += `:root {\n${rootDeclarations}\n}`;
+  }
+
+  // Generate .dark block
+  if (darkColors.length > 0) {
+    if (output) output += '\n\n';
+    const darkDeclarations = darkColors
+      .map(color => {
+        const value = format === 'oklch' && color.oklch && isColorValue(color.value)
+          ? color.oklch
+          : color.value;
+        return `  ${color.name}: ${value};`;
+      })
+      .join('\n');
+    output += `.dark {\n${darkDeclarations}\n}`;
+  }
+
+  return output;
 }
 
 /**

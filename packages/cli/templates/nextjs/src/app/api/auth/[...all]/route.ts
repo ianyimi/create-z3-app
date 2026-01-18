@@ -1,4 +1,4 @@
-import { handler } from "~/lib/auth/server"
+import { handler } from "~/auth/server"
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

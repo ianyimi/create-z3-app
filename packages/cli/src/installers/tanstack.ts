@@ -148,13 +148,13 @@ export class TanStackInstaller extends FrameworkInstaller {
 
   /**
    * Apply TweakCN theme to global CSS file
-   * Target file: src/styles/globals.css
+   * Target file: src/styles.css
    * Placeholder: CSS comment with TWEAKCN_THEME variable
    *
    * @param themeContent - CSS content to apply
    */
   async applyTweakCNTheme(themeContent: string): Promise<void> {
-    const cssFilePath = join(this.targetPath, 'src/styles/globals.css');
+    const cssFilePath = join(this.targetPath, 'src/styles.css');
 
     await replacePlaceholder(
       cssFilePath,

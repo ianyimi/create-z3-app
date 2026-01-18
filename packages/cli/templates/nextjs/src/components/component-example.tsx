@@ -66,10 +66,12 @@ import {
 } from "~/components/ui/select"
 import { Textarea } from "~/components/ui/textarea"
 import { PlusIcon, BluetoothIcon, MoreVerticalIcon, FileIcon, FolderIcon, FolderOpenIcon, FileCodeIcon, MoreHorizontalIcon, FolderSearchIcon, SaveIcon, DownloadIcon, EyeIcon, LayoutIcon, PaletteIcon, SunIcon, MoonIcon, MonitorIcon, UserIcon, CreditCardIcon, SettingsIcon, KeyboardIcon, LanguagesIcon, BellIcon, MailIcon, ShieldIcon, HelpCircleIcon, FileTextIcon, LogOutIcon } from "lucide-react"
+import { ThemeToggle } from "~/components/ui/theme-toggle"
 
 export function ComponentExample() {
   return (
     <ExampleWrapper>
+      <ThemeToggle className="absolute top-10 right-10" />
       <CardExample />
       <FormExample />
     </ExampleWrapper>

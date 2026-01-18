@@ -90,10 +90,12 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
+import { ThemeToggle } from '~/components/ui/theme-toggle'
 
 export function ComponentExample() {
   return (
     <ExampleWrapper>
+      <ThemeToggle className="absolute top-10 right-10" />
       <CardExample />
       <FormExample />
     </ExampleWrapper>

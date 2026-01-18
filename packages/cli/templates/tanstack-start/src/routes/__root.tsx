@@ -5,6 +5,7 @@ import { HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import type { ConvexQueryClient } from "@convex-dev/react-query"
 import { Providers } from "~/providers"
+import { ThemeProvider, getThemeServerFn } from "~/lib/theme"
 
 import appCss from '../styles.css?url'
 import { createServerFn } from "@tanstack/react-start"
@@ -48,6 +49,7 @@ export const Route = createRootRouteWithContext<{
       token
     }
   },
+  loader: () => getThemeServerFn(),
 
   component: RootComponent,
   shellComponent: RootDocument,
@@ -59,15 +61,18 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const theme = Route.useLoaderData()
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        <Providers>
-          {children}
-        </Providers>
+        <ThemeProvider theme={theme}>
+          <Providers>
+            {children}
+          </Providers>
+        </ThemeProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',

@@ -98,13 +98,13 @@ export interface OAuthProvider {
 
 /**
  * TweakCN theme configuration interface
- * Supports both URL fetching and direct CSS paste
+ * Supports direct CSS paste from TweakCN's code dialog
  */
 export interface TweakCNTheme {
-  /** Type of theme input: URL to fetch or raw CSS content */
-  type: 'url' | 'css';
+  /** Type of theme input: only 'css' is supported */
+  type: 'css';
 
-  /** Theme content: URL string or CSS content string */
+  /** CSS content string with :root and .dark blocks */
   content: string;
 }
 

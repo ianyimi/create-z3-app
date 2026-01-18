@@ -12,7 +12,6 @@ import crypto from 'crypto';
 import type { ProjectOptions, PackageManager } from './types.js';
 import { copyTemplate } from '../helpers/fileOperations.js';
 import { DEFAULT_THEME } from './string-utils.js';
-import { convertTweakCNToOKLCH } from '../utils/tweakcn-converter.js';
 
 /**
  * Abstract base class for framework-specific installers
@@ -312,49 +311,6 @@ export abstract class FrameworkInstaller {
    * @param convertToOklch - Whether to convert theme colors to OKLCH format (default: true)
    * @returns Theme CSS content in OKLCH format (if conversion enabled)
    */
-  protected async fetchThemeFromUrl(url: string, convertToOklch = true): Promise<string> {
-    const spinner = ora('Fetching TweakCN theme...').start();
-
-    try {
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const content = await response.text();
-      spinner.succeed('TweakCN theme fetched');
-
-      // Optionally convert to OKLCH format using the TweakCN converter utility
-      if (convertToOklch) {
-        const convertSpinner = ora('Converting theme to OKLCH format...').start();
-        try {
-          // Use the converter utility to transform colors to OKLCH
-          const convertedContent = await convertTweakCNToOKLCH({
-            source: url,
-            format: 'oklch',
-          });
-          convertSpinner.succeed('Theme converted to OKLCH format');
-          return convertedContent;
-        } catch (convertError) {
-          // If conversion fails, fall back to raw content with warning
-          convertSpinner.warn('OKLCH conversion failed, using raw theme CSS');
-          console.warn(
-            `Warning: Failed to convert theme to OKLCH: ${convertError instanceof Error ? convertError.message : 'Unknown error'}`
-          );
-          return content;
-        }
-      }
-
-      return content;
-    } catch (error) {
-      spinner.fail('Failed to fetch TweakCN theme');
-      throw new Error(
-        `Theme fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}\n` +
-        'Please check the URL and your internet connection, then try again.'
-      );
-    }
-  }
 
   /**
    * Main orchestration method for project initialization
@@ -451,18 +407,9 @@ export abstract class FrameworkInstaller {
     try {
       let themeContent: string;
 
-      if (options.tweakcnTheme) {
-        if (options.tweakcnTheme.type === 'url') {
-          // Fetch and convert theme from URL
-          themeContent = await this.fetchThemeFromUrl(options.tweakcnTheme.content);
-        } else if (options.tweakcnTheme.type === 'css') {
-          // Use raw CSS content directly (no OKLCH conversion for inline CSS)
-          themeContent = options.tweakcnTheme.content;
-        } else {
-          // Fallback for any unexpected type
-          themeContent = options.tweakcnTheme.content;
-        }
-
+      if (options.tweakcnTheme && options.tweakcnTheme.type === 'css') {
+        // Use pasted CSS content directly
+        themeContent = options.tweakcnTheme.content;
         await this.applyTweakCNTheme(themeContent);
         themeSpinner.succeed('TweakCN theme applied');
       } else {

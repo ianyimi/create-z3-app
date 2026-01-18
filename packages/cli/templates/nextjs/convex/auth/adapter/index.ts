@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Where } from "better-auth/types";
 import type {
   GenericActionCtx,
@@ -186,7 +190,7 @@ export const convexAdapter = <DataModel extends GenericDataModel>(
           return new Date(data).getTime();
         }
         // Handle array fields - Better Auth serializes them as JSON strings
-        if (fieldAttributes.type && fieldAttributes.type.endsWith("[]")) {
+        if ((fieldAttributes.type as string)?.endsWith("[]")) {
           if (typeof data === "string") {
             try {
               return JSON.parse(data);

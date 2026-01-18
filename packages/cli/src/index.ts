@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { select, input, checkbox, confirm, Separator } from '@inquirer/prompts';
+import { select, input, checkbox, confirm, editor, Separator } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -199,18 +199,40 @@ program
         console.log();
       }
 
-      // TweakCN theme URL prompt (optional)
-      const tweakcnThemeUrl = await input({
-        message: 'Enter TweakCN theme URL (optional, press Enter to skip):',
-        default: '',
+      // TweakCN theme CSS prompt (optional)
+      console.log();
+      console.log(chalk.dim('💡 TweakCN themes: Visit https://tweakcn.com/themes/[theme-id]'));
+      console.log(chalk.dim('   Click "Code" button and copy the CSS.'));
+      const applyTheme = await confirm({
+        message: 'Apply a custom TweakCN theme? (This will open your editor - paste CSS, save, and close file to continue)',
+        default: false,
       });
 
       let tweakcnTheme: TweakCNTheme | undefined;
-      if (tweakcnThemeUrl.trim()) {
-        tweakcnTheme = {
-          type: 'url',
-          content: tweakcnThemeUrl.trim(),
-        };
+      if (applyTheme) {
+        console.log();
+        console.log(chalk.cyan('📝 Opening your text editor...'));
+        console.log(chalk.dim('   Paste the CSS, save, and close the editor to continue.'));
+        console.log();
+
+        const tweakcnThemeInput = await editor({
+          message: 'Enter TweakCN theme CSS:',
+          default: '',
+          waitForUserInput: false,
+        });
+
+        const trimmedInput = tweakcnThemeInput.trim();
+        if (trimmedInput) {
+          // Check if input looks like CSS
+          if (trimmedInput.includes(':root') || trimmedInput.includes('--background') || trimmedInput.includes('oklch')) {
+            tweakcnTheme = {
+              type: 'css',
+              content: trimmedInput,
+            };
+          } else {
+            console.log(chalk.yellow('\n⚠️  Invalid CSS: Expected CSS with :root and color variables. Skipping theme.\n'));
+          }
+        }
       }
 
       // Git initialization prompt

@@ -2,7 +2,7 @@
 
 // src/index.ts
 import { Command } from "commander";
-import { select, input, checkbox, confirm, Separator } from "@inquirer/prompts";
+import { select, input, checkbox, confirm, editor, Separator } from "@inquirer/prompts";
 import chalk2 from "chalk";
 import { readFileSync } from "fs";
 import { fileURLToPath as fileURLToPath2 } from "url";
@@ -1936,129 +1936,6 @@ import { join as join2 } from "path";
 import { execa } from "execa";
 import ora from "ora";
 import crypto from "crypto";
-
-// src/utils/tweakcn-converter.ts
-import fs4 from "fs-extra";
-import convert from "color-convert";
-async function convertTweakCNToOKLCH(options) {
-  const { source, format = "oklch" } = options;
-  const cssContent = await fetchOrReadCSS(source);
-  const colors = parseColorsFromCSS(cssContent);
-  const convertedColors = colors.map((color) => ({
-    ...color,
-    oklch: convertColorToOKLCH(color.value)
-  }));
-  return generateCSSOutput(convertedColors, format);
-}
-async function fetchOrReadCSS(source) {
-  if (source.startsWith("http://") || source.startsWith("https://")) {
-    try {
-      const response = await fetch(source);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return await response.text();
-    } catch (error) {
-      throw new Error(
-        `Failed to fetch CSS from URL: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
-  }
-  try {
-    return await fs4.readFile(source, "utf-8");
-  } catch (error) {
-    throw new Error(
-      `Failed to read CSS from file: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
-}
-function parseColorsFromCSS(css) {
-  const colors = [];
-  const cssVarRegex = /--([\w-]+)\s*:\s*([^;]+);/g;
-  let match;
-  while ((match = cssVarRegex.exec(css)) !== null) {
-    const name = `--${match[1]}`;
-    const value = match[2].trim();
-    if (isColorValue(value)) {
-      colors.push({ name, value });
-    }
-  }
-  return colors;
-}
-function isColorValue(value) {
-  if (value.startsWith("#")) {
-    return true;
-  }
-  if (value.startsWith("rgb(") || value.startsWith("rgba(")) {
-    return true;
-  }
-  if (value.startsWith("hsl(") || value.startsWith("hsla(")) {
-    return true;
-  }
-  if (value.startsWith("oklch(")) {
-    return true;
-  }
-  if (/^\d+(\.\d+)?\s+\d+(\.\d+)?%\s+\d+(\.\d+)?%$/.test(value)) {
-    return true;
-  }
-  return false;
-}
-function convertColorToOKLCH(colorValue) {
-  const trimmed = colorValue.trim();
-  if (trimmed.startsWith("oklch(")) {
-    const match = trimmed.match(/oklch\(([\d.]+%?)\s+([\d.]+)\s+([\d.]+)\)/);
-    if (match) {
-      return `${match[1]} ${match[2]} ${match[3]}`;
-    }
-  }
-  let rgb;
-  try {
-    if (trimmed.startsWith("#")) {
-      rgb = convert.hex.rgb(trimmed.slice(1));
-    } else if (trimmed.startsWith("rgb(") || trimmed.startsWith("rgba(")) {
-      const match = trimmed.match(/rgba?\((\d+),?\s*(\d+),?\s*(\d+)/);
-      if (!match) throw new Error("Invalid RGB format");
-      rgb = [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])];
-    } else if (trimmed.startsWith("hsl(") || trimmed.startsWith("hsla(")) {
-      const match = trimmed.match(/hsla?\((\d+),?\s*(\d+)%?,?\s*(\d+)%?/);
-      if (!match) throw new Error("Invalid HSL format");
-      const hsl2 = [
-        parseInt(match[1]),
-        parseInt(match[2]),
-        parseInt(match[3])
-      ];
-      rgb = convert.hsl.rgb(hsl2);
-    } else if (/^\d+(\.\d+)?\s+\d+(\.\d+)?%\s+\d+(\.\d+)?%$/.test(trimmed)) {
-      const parts = trimmed.split(/\s+/);
-      const h2 = parseFloat(parts[0]);
-      const s = parseFloat(parts[1].replace("%", ""));
-      const l2 = parseFloat(parts[2].replace("%", ""));
-      rgb = convert.hsl.rgb([h2, s, l2]);
-    } else {
-      return trimmed;
-    }
-    const hsl = convert.rgb.hsl(rgb);
-    const l = hsl[2];
-    const c = hsl[1] / 100 * 0.4;
-    const h = hsl[0];
-    return `${l}% ${c.toFixed(3)} ${h}`;
-  } catch (error) {
-    console.warn(`Failed to convert color "${colorValue}": ${error instanceof Error ? error.message : "Unknown error"}`);
-    return trimmed;
-  }
-}
-function generateCSSOutput(colors, format) {
-  if (colors.length === 0) {
-    return "";
-  }
-  const declarations = colors.map((color) => {
-    const value = format === "oklch" && color.oklch ? color.oklch : color.value;
-    return `${color.name}: ${value};`;
-  }).join("\n");
-  return declarations;
-}
-
-// src/installers/base.ts
 var FrameworkInstaller = class {
   /**
    * Constructor for FrameworkInstaller
@@ -2249,41 +2126,6 @@ Make sure you are authenticated with GitHub CLI (run "gh auth login")`
    * @param convertToOklch - Whether to convert theme colors to OKLCH format (default: true)
    * @returns Theme CSS content in OKLCH format (if conversion enabled)
    */
-  async fetchThemeFromUrl(url, convertToOklch = true) {
-    const spinner = ora("Fetching TweakCN theme...").start();
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      const content = await response.text();
-      spinner.succeed("TweakCN theme fetched");
-      if (convertToOklch) {
-        const convertSpinner = ora("Converting theme to OKLCH format...").start();
-        try {
-          const convertedContent = await convertTweakCNToOKLCH({
-            source: url,
-            format: "oklch"
-          });
-          convertSpinner.succeed("Theme converted to OKLCH format");
-          return convertedContent;
-        } catch (convertError) {
-          convertSpinner.warn("OKLCH conversion failed, using raw theme CSS");
-          console.warn(
-            `Warning: Failed to convert theme to OKLCH: ${convertError instanceof Error ? convertError.message : "Unknown error"}`
-          );
-          return content;
-        }
-      }
-      return content;
-    } catch (error) {
-      spinner.fail("Failed to fetch TweakCN theme");
-      throw new Error(
-        `Theme fetch failed: ${error instanceof Error ? error.message : "Unknown error"}
-Please check the URL and your internet connection, then try again.`
-      );
-    }
-  }
   /**
    * Main orchestration method for project initialization
    * Coordinates all setup steps in sequence
@@ -2365,14 +2207,8 @@ Please check the URL and your internet connection, then try again.`
     const themeSpinner = ora("Applying theme...").start();
     try {
       let themeContent;
-      if (options.tweakcnTheme) {
-        if (options.tweakcnTheme.type === "url") {
-          themeContent = await this.fetchThemeFromUrl(options.tweakcnTheme.content);
-        } else if (options.tweakcnTheme.type === "css") {
-          themeContent = options.tweakcnTheme.content;
-        } else {
-          themeContent = options.tweakcnTheme.content;
-        }
+      if (options.tweakcnTheme && options.tweakcnTheme.type === "css") {
+        themeContent = options.tweakcnTheme.content;
         await this.applyTweakCNTheme(themeContent);
         themeSpinner.succeed("TweakCN theme applied");
       } else {
@@ -2492,13 +2328,13 @@ var TanStackInstaller = class extends FrameworkInstaller {
   }
   /**
    * Apply TweakCN theme to global CSS file
-   * Target file: src/styles/globals.css
+   * Target file: src/styles.css
    * Placeholder: CSS comment with TWEAKCN_THEME variable
    *
    * @param themeContent - CSS content to apply
    */
   async applyTweakCNTheme(themeContent) {
-    const cssFilePath = join2(this.targetPath, "src/styles/globals.css");
+    const cssFilePath = join2(this.targetPath, "src/styles.css");
     await replacePlaceholder(
       cssFilePath,
       "/* {{TWEAKCN_THEME}} */",
@@ -2782,16 +2618,35 @@ program.name("create-z3").version(packageJson.version).description("CLI for scaf
       console.log(chalk2.yellow("   Your app will have no user authentication."));
       console.log();
     }
-    const tweakcnThemeUrl = await input({
-      message: "Enter TweakCN theme URL (optional, press Enter to skip):",
-      default: ""
+    console.log();
+    console.log(chalk2.dim("\u{1F4A1} TweakCN themes: Visit https://tweakcn.com/themes/[theme-id]"));
+    console.log(chalk2.dim('   Click "Code" button and copy the CSS.'));
+    const applyTheme = await confirm({
+      message: "Apply a custom TweakCN theme? (This will open your editor - paste CSS, save, and close file to continue)",
+      default: false
     });
     let tweakcnTheme;
-    if (tweakcnThemeUrl.trim()) {
-      tweakcnTheme = {
-        type: "url",
-        content: tweakcnThemeUrl.trim()
-      };
+    if (applyTheme) {
+      console.log();
+      console.log(chalk2.cyan("\u{1F4DD} Opening your text editor..."));
+      console.log(chalk2.dim("   Paste the CSS, save, and close the editor to continue."));
+      console.log();
+      const tweakcnThemeInput = await editor({
+        message: "Enter TweakCN theme CSS:",
+        default: "",
+        waitForUserInput: false
+      });
+      const trimmedInput = tweakcnThemeInput.trim();
+      if (trimmedInput) {
+        if (trimmedInput.includes(":root") || trimmedInput.includes("--background") || trimmedInput.includes("oklch")) {
+          tweakcnTheme = {
+            type: "css",
+            content: trimmedInput
+          };
+        } else {
+          console.log(chalk2.yellow("\n\u26A0\uFE0F  Invalid CSS: Expected CSS with :root and color variables. Skipping theme.\n"));
+        }
+      }
     }
     const initGit = await confirm({
       message: "Initialize Git repository?",

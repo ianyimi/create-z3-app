@@ -1,14 +1,22 @@
 import { NuqsAdapter } from "nuqs/adapters/next/app"
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react"
 
-import ConvexClientProvider from "./convex";
+import ConvexClientProvider from "./convex"
+import { ThemeProvider } from "./theme"
 
 export default function ServerProviders({ children }: PropsWithChildren) {
-	return (
-		<ConvexClientProvider>
-			<NuqsAdapter>
-				{children}
-			</NuqsAdapter>
-		</ConvexClientProvider>
-	)
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      disableTransitionOnChange
+      enableSystem
+    >
+      <ConvexClientProvider>
+        <NuqsAdapter>
+          {children}
+        </NuqsAdapter>
+      </ConvexClientProvider>
+    </ThemeProvider>
+  )
 }

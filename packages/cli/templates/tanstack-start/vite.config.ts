@@ -11,7 +11,7 @@ import './src/env'
 
 const config = defineConfig({
   server: {
-    port: 3005
+    port: 3000
   },
   plugins: [
     devtools(),
