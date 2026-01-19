@@ -1,11 +1,12 @@
 import { createAuthClient } from "better-auth/react"
-import { apiKeyClient } from "better-auth/client/plugins"
+import { adminClient, apiKeyClient } from "better-auth/client/plugins"
 import { env } from '~/env';
 
 export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: env.VITE_SITE_URL, // Point to TanStack Start, which proxies to Convex
   plugins: [
+    adminClient(),
     apiKeyClient()
   ]
 })

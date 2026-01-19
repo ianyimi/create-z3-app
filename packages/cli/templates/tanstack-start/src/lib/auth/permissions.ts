@@ -62,9 +62,9 @@ const ROLES = {
   [USER_ROLES.user]: {
     [TABLE_SLUG_USERS]: {
       create: false,
-      delete: ({ data, user }) => user.id === data.id,
-      read: ({ data, user }) => user.id === data.id,
-      update: ({ data, user }) => user.id === data.id,
+      delete: ({ data: targetUser, user }) => user._id === targetUser._id,
+      read: ({ data: targetUser, user }) => user._id === targetUser._id,
+      update: ({ data: targetUser, user }) => user._id === targetUser._id,
     },
   },
 } as const satisfies RolesWithPermissions;
@@ -82,14 +82,13 @@ export function hasPermission<Resource extends keyof Permissions>({
 }): boolean {
   if (!user?.role) { return false; }
 
-  const permission = (ROLES as RolesWithPermissions)[user.role][resource]?.[
-    action
-  ];
+  return user.role.some((role: UserRole) => {
+    const permission = (ROLES as RolesWithPermissions)[role][resource]?.[action]
 
-  if (!permission) { return false; }
+    if (!permission) { return false }
 
-  if (typeof permission === "boolean") { return permission; }
+    if (typeof permission === "boolean") { return permission }
 
-  return data != null && permission({ data, user });
+    return data != null && permission({ data, user })
+  })
 }
-

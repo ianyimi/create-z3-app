@@ -185,14 +185,25 @@ export const convexAdapter = <DataModel extends GenericDataModel>(
         if (data && fieldAttributes.type === "date") {
           return new Date(data).getTime();
         }
-        // Handle array fields - Better Auth serializes them as JSON strings
-        if (fieldAttributes.type && fieldAttributes.type.endsWith("[]")) {
+        // Handle array fields - Better Auth may send single values or arrays
+        if ((fieldAttributes.type as string)?.endsWith("[]")) {
+          // If already an array, return as-is
+          if (Array.isArray(data)) {
+            return data
+          }
+          // If it's a string that looks like JSON array, parse it
           if (typeof data === "string") {
             try {
-              return JSON.parse(data);
+              const parsed = JSON.parse(data)
+              return Array.isArray(parsed) ? parsed : [data]
             } catch {
-              return data;
+              // If parsing fails, wrap the string in an array
+              return [data]
             }
+          }
+          // For any other value type, wrap in array
+          if (data !== null && data !== undefined) {
+            return [data]
           }
         }
         return data;

@@ -6,6 +6,9 @@ import { TABLE_SLUG_ACCOUNTS, TABLE_SLUG_JWKS, TABLE_SLUG_SESSIONS, TABLE_SLUG_U
 export default defineSchema({
   // Better Auth component tables (type definitions only - actual tables are in component)
   [TABLE_SLUG_USERS]: defineTable({
+    banExpires: v.optional(v.number()), // admin plugin
+    banned: v.optional(v.boolean()), // admin plugin
+    banReason: v.optional(v.string()), // admin plugin
     displayUsername: v.optional(v.union(v.null(), v.string())),
     name: v.string(),
     username: v.optional(v.union(v.null(), v.string())),
@@ -16,7 +19,7 @@ export default defineSchema({
     isAnonymous: v.optional(v.union(v.null(), v.boolean())),
     phoneNumber: v.optional(v.union(v.null(), v.string())),
     phoneNumberVerified: v.optional(v.union(v.null(), v.boolean())),
-    role: v.array(v.string()),
+    role: v.array(v.string()), // admin plugin
     twoFactorEnabled: v.optional(v.union(v.null(), v.boolean())),
     updatedAt: v.number(),
     userId: v.optional(v.union(v.null(), v.string()))
@@ -43,6 +46,7 @@ export default defineSchema({
   [TABLE_SLUG_SESSIONS]: defineTable({
     createdAt: v.number(),
     expiresAt: v.number(),
+    impersonatedBy: v.optional(v.id(TABLE_SLUG_USERS)), // admin plugin
     ipAddress: v.optional(v.string()),
     token: v.string(),
     updatedAt: v.number(),

@@ -16,10 +16,13 @@ export default defineSchema({
     isAnonymous: v.optional(v.union(v.null(), v.boolean())),
     phoneNumber: v.optional(v.union(v.null(), v.string())),
     phoneNumberVerified: v.optional(v.union(v.null(), v.boolean())),
-    role: v.array(v.string()),
     twoFactorEnabled: v.optional(v.union(v.null(), v.boolean())),
     updatedAt: v.number(),
-    userId: v.optional(v.union(v.null(), v.string()))
+    userId: v.optional(v.union(v.null(), v.string())),
+    banExpires: v.optional(v.number()), // admin plugin
+    banned: v.optional(v.boolean()), // admin plugin
+    banReason: v.optional(v.string()), // admin plugin
+    role: v.array(v.string()), // admin plugin
   })
     .index("by_email", ["email"]),
 
@@ -48,6 +51,7 @@ export default defineSchema({
     updatedAt: v.number(),
     userAgent: v.optional(v.string()),
     userId: v.id(TABLE_SLUG_USERS),
+    impersonatedBy: v.optional(v.id(TABLE_SLUG_USERS)), // admin plugin
   })
     .index("by_token", ["token"]),
 

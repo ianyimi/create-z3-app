@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { convexClient } from "@convex-dev/better-auth/client/plugins";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import {
+  adminClient,
   apiKeyClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from 'better-auth/react'
@@ -15,6 +16,7 @@ export const authClient = createAuthClient({
   basePath: "/api/auth",
   baseURL: env.NEXT_PUBLIC_SITE_URL,
   plugins: [
+    adminClient(),
     apiKeyClient(),
     convexClient()
   ]
@@ -38,7 +40,7 @@ export default function BetterAuthClientProvider({ children }: { children: React
         router.refresh()
       }}
       replace={router.replace}
-      // {{OAUTH_UI_PROVIDERS}}
+    // {{OAUTH_UI_PROVIDERS}}
     >
       {children}
     </AuthUIProvider>
