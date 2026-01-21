@@ -76,5 +76,21 @@ export async function copyTemplate(framework: string, targetPath: string): Promi
   await fs.copy(templatePath, targetPath, {
     overwrite: false,
     errorOnExist: false,
+    filter: (src) => {
+      // Skip copying _gitignore here, we'll handle it separately
+      return !src.endsWith('_gitignore');
+    },
   });
+
+  // Rename _gitignore to .gitignore
+  // npm excludes .gitignore files from published packages, so we store them as _gitignore
+  const sourceGitignore = join(templatePath, '_gitignore');
+  const targetGitignore = join(targetPath, '.gitignore');
+
+  if (await fs.pathExists(sourceGitignore)) {
+    await fs.copy(sourceGitignore, targetGitignore, {
+      overwrite: false,
+      errorOnExist: false,
+    });
+  }
 }

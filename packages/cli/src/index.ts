@@ -5,7 +5,7 @@ import { select, input, checkbox, confirm, editor, Separator } from '@inquirer/p
 import chalk from 'chalk';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 import { validateProjectName, checkDirectoryExists, isDirectoryEmpty, resolveProjectName } from './utils/validation.js';
 import { createProjectDirectory, getTargetDirectory } from './helpers/fileOperations.js';
 import {
@@ -112,11 +112,12 @@ program
         // Resolve project name (handle dot notation)
         const resolvedName = resolveProjectName(projectNameArg, cwd);
 
-        // Validate project name from argument
-        const validation = validateProjectName(resolvedName);
+        // For validation, use basename if input is "."
+        const nameToValidate = resolvedName === '.' ? basename(cwd) : resolvedName;
+        const validation = validateProjectName(nameToValidate);
 
         if (!validation.valid) {
-          displayInvalidNameError(resolvedName, validation.errors);
+          displayInvalidNameError(nameToValidate, validation.errors);
         }
 
         projectName = resolvedName;
@@ -133,15 +134,16 @@ program
           // Resolve project name (handle dot notation)
           const resolvedName = resolveProjectName(inputName, cwd);
 
-          // Validate the input
-          const validation = validateProjectName(resolvedName);
+          // For validation, use basename if input is "."
+          const nameToValidate = resolvedName === '.' ? basename(cwd) : resolvedName;
+          const validation = validateProjectName(nameToValidate);
 
           if (validation.valid) {
             projectName = resolvedName;
             isValid = true;
           } else {
             console.error();
-            console.error(chalk.red(`Invalid project name '${resolvedName}'.`));
+            console.error(chalk.red(`Invalid project name '${nameToValidate}'.`));
 
             if (validation.errors.length > 0) {
               validation.errors.forEach(error => {
@@ -273,11 +275,14 @@ program
       }
 
       // Instantiate correct installer based on framework selection
+      // For package.json name, use basename if projectName is "."
+      const packageName = projectName === '.' ? basename(createdPath) : projectName;
+
       let installer;
       if (framework === 'tanstack') {
-        installer = new TanStackInstaller(createdPath, projectName);
+        installer = new TanStackInstaller(createdPath, packageName);
       } else {
-        installer = new NextJSInstaller(createdPath, projectName);
+        installer = new NextJSInstaller(createdPath, packageName);
       }
 
       // Execute all configuration steps through the installer

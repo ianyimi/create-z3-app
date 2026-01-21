@@ -61,28 +61,15 @@ export async function isDirectoryEmpty(dirPath: string): Promise<boolean> {
 
 /**
  * Resolves the project name based on input.
- * If input is ".", returns the basename of the current working directory.
+ * If input is ".", keeps it as "." for directory creation but validates using the current directory's basename.
  * Otherwise, returns the input unchanged.
  *
  * @param input - The project name input (can be "." for current directory)
  * @param cwd - The current working directory path
- * @returns The resolved project name
+ * @returns The project name (kept as "." if that was the input)
  */
 export function resolveProjectName(input: string, cwd: string): string {
-  if (input === '.') {
-    const dirName = basename(cwd);
-
-    // Check if the directory name is a valid npm package name
-    const validation = validateProjectName(dirName);
-
-    if (!validation.valid) {
-      // If invalid, we'll still return it but the validation will catch it later
-      // This allows the error handling to provide appropriate feedback
-      return dirName;
-    }
-
-    return dirName;
-  }
-
+  // Keep "." as-is - don't convert to basename
+  // The basename will be used for validation and package.json, but not for directory creation
   return input;
 }

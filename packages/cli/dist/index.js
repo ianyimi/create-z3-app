@@ -6,12 +6,11 @@ import { select, input, checkbox, confirm, editor, Separator } from "@inquirer/p
 import chalk2 from "chalk";
 import { readFileSync } from "fs";
 import { fileURLToPath as fileURLToPath2 } from "url";
-import { dirname as dirname2, join as join4 } from "path";
+import { dirname as dirname2, join as join4, basename } from "path";
 
 // src/utils/validation.ts
 import validateNpmPackageName from "validate-npm-package-name";
 import fs from "fs-extra";
-import { basename } from "path";
 function validateProjectName(name) {
   const result = validateNpmPackageName(name);
   if (result.validForNewPackages) {
@@ -39,14 +38,6 @@ async function isDirectoryEmpty(dirPath) {
   }
 }
 function resolveProjectName(input2, cwd) {
-  if (input2 === ".") {
-    const dirName = basename(cwd);
-    const validation = validateProjectName(dirName);
-    if (!validation.valid) {
-      return dirName;
-    }
-    return dirName;
-  }
   return input2;
 }
 
@@ -78,8 +69,19 @@ async function copyTemplate(framework, targetPath) {
   }
   await fs2.copy(templatePath, targetPath, {
     overwrite: false,
-    errorOnExist: false
+    errorOnExist: false,
+    filter: (src) => {
+      return !src.endsWith("_gitignore");
+    }
   });
+  const sourceGitignore = join(templatePath, "_gitignore");
+  const targetGitignore = join(targetPath, ".gitignore");
+  if (await fs2.pathExists(sourceGitignore)) {
+    await fs2.copy(sourceGitignore, targetGitignore, {
+      overwrite: false,
+      errorOnExist: false
+    });
+  }
 }
 
 // src/utils/messages.ts
@@ -2559,9 +2561,10 @@ program.name("create-z3").version(packageJson.version).description("CLI for scaf
     let projectName = "";
     if (projectNameArg) {
       const resolvedName = resolveProjectName(projectNameArg, cwd);
-      const validation = validateProjectName(resolvedName);
+      const nameToValidate = resolvedName === "." ? basename(cwd) : resolvedName;
+      const validation = validateProjectName(nameToValidate);
       if (!validation.valid) {
-        displayInvalidNameError(resolvedName, validation.errors);
+        displayInvalidNameError(nameToValidate, validation.errors);
       }
       projectName = resolvedName;
     } else {
@@ -2572,13 +2575,14 @@ program.name("create-z3").version(packageJson.version).description("CLI for scaf
           default: "my-z3-app"
         });
         const resolvedName = resolveProjectName(inputName, cwd);
-        const validation = validateProjectName(resolvedName);
+        const nameToValidate = resolvedName === "." ? basename(cwd) : resolvedName;
+        const validation = validateProjectName(nameToValidate);
         if (validation.valid) {
           projectName = resolvedName;
           isValid = true;
         } else {
           console.error();
-          console.error(chalk2.red(`Invalid project name '${resolvedName}'.`));
+          console.error(chalk2.red(`Invalid project name '${nameToValidate}'.`));
           if (validation.errors.length > 0) {
             validation.errors.forEach((error) => {
               console.error(chalk2.yellow(`  - ${error}`));
@@ -2674,11 +2678,12 @@ program.name("create-z3").version(packageJson.version).description("CLI for scaf
       }
       throw error;
     }
+    const packageName = projectName === "." ? basename(createdPath) : projectName;
     let installer;
     if (framework === "tanstack") {
-      installer = new TanStackInstaller(createdPath, projectName);
+      installer = new TanStackInstaller(createdPath, packageName);
     } else {
-      installer = new NextJSInstaller(createdPath, projectName);
+      installer = new NextJSInstaller(createdPath, packageName);
     }
     try {
       await installer.initProject(projectOptions);
