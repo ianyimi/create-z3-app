@@ -95,7 +95,7 @@ import { ThemeToggle } from '~/components/ui/theme-toggle'
 export function ComponentExample() {
   return (
     <ExampleWrapper>
-      <ThemeToggle className="absolute top-10 right-10" />
+      <ThemeToggle className="absolute w-md:top-10 right-10 top-2" />
       <CardExample />
       <FormExample />
     </ExampleWrapper>
