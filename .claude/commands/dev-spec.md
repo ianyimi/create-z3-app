@@ -106,7 +106,30 @@ Iterate on this until the developer is satisfied with the scope and edge case co
 
 Create the spec document at the path the user specifies (or suggest one based on existing spec numbering in `agent-os/product/`).
 
+#### Build Order: Testable at Every Step
+
+**This is the most important structural decision in the spec.** The implementation order must follow an outside-in approach so the developer can build, run, and test at every step:
+
+1. **Step 1 is always setup** — config files, package scaffolding, anything needed to make `build` and `test` commands work (even if they produce empty output). After Step 1, `pnpm build` and `pnpm test` must both run without errors.
+2. **Step 2 is the entry point / public API** — the main function or module that consumers will import. Start with hardcoded or minimal return values so the package can be imported and type-checked immediately. The developer should be able to wire it into the consuming code (e.g., `vex.config.ts`) right away to verify the import works.
+3. **Step 3 is a test shell** — set up the test file(s) for the entry point so `pnpm test` runs from this point forward. Start with tests that pass against the hardcoded return.
+4. **Remaining steps progressively replace hardcoded values with real implementations** — each step implements one internal function, adds its tests, and wires it into the entry point. After each step, run tests to verify everything still works.
+5. **Last step is final integration** — expand tests, add re-exports, verify full build, update consuming code.
+
+**The rule: after completing any step, the developer should be able to run `build` and `test` and see progress.** Never structure a spec where the developer builds 5 files in isolation and then has to wire them all together at the end hoping it works.
+
+#### Task Checkboxes
+
+Every step must include markdown task checkboxes (`- [ ]`) listing each concrete action in that step. This lets the developer track progress directly in the spec file. Include checkboxes for:
+- Each file to create or modify
+- Each command to run (install, build, test)
+- Each verification step (e.g., "Verify test app compiles")
+
+The Success Criteria section at the end should also use checkboxes.
+
 #### Spec Document Structure
+
+The spec is organized **by implementation step**, not by category. The developer reads top to bottom and does each step in order. Each step says which files to create or modify, with the full code or guided stub right there.
 
 ```markdown
 # {Spec Number} — {Feature Name}
@@ -114,59 +137,83 @@ Create the spec document at the path the user specifies (or suggest one based on
 ## Overview
 [2-3 sentences: what this spec covers and why]
 
-## Prerequisites
-[What must be done/exist before starting this spec]
+## Design Decisions
+[Key decisions made during shaping, with brief rationale]
 
-## Directory Structure
-[Show the file tree that will exist after implementation, with annotations]
+## Out of Scope
+[What this spec explicitly does NOT cover]
+
+## Target Directory Structure
+[File tree showing what will exist after implementation, with annotations]
 
 ## Implementation Order
-[Numbered phases with clear dependencies. Mark which phases are "write the code" vs "just create the file"]
+[Numbered list summarizing the steps — serves as a table of contents.
+ Each entry should note what becomes testable after that step.]
 
-## Types & Interfaces (Full Code)
-[Complete, copy-pasteable type definitions with JSDoc comments]
+---
 
-## Function Stubs (Guided)
-[For each non-trivial function:]
-### `functionName()`
-**File:** `path/to/file.ts`
-**Signature:**
-```ts
-export function functionName(params: Type): ReturnType {
-  // TODO: implement
-  throw new Error("Not implemented");
-}
+## Step 1: [Setup — scaffolding, config, install]
+
+- [ ] [Concrete action]
+- [ ] [Concrete action]
+- [ ] Run build/install and verify it works
+
+[File blocks with code...]
+
+---
+
+## Step 2: [Entry point with hardcoded return]
+
+- [ ] [Create/modify file]
+- [ ] [Verify import works in consuming code]
+
+[File blocks with code...]
+
+---
+
+## Step 3: [Test shell — initial tests against hardcoded return]
+
+- [ ] [Create test file]
+- [ ] [Run tests]
+
+[File blocks with code...]
+
+---
+
+## Step 4+: [Implement function X + tests, wire into entry point]
+
+- [ ] [Create implementation file]
+- [ ] [Create test file]
+- [ ] [Update entry point to use real implementation instead of hardcoded value]
+- [ ] [Run tests]
+
+[File blocks with code...]
+
+---
+
+## Step N: [Final integration — full tests, re-exports, build, consuming code]
+
+- [ ] [Expand integration tests]
+- [ ] [Add re-exports]
+- [ ] [Run full build]
+- [ ] [Update consuming code]
+
+## Success Criteria
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
 ```
-**Purpose:** [What this function does]
-**Algorithm/Approach:** [High-level steps, not pseudocode — the developer should write the actual logic]
-**Edge cases:**
-- [Edge case 1 and how to handle it]
-- [Edge case 2 and how to handle it]
-**Constraints:**
-- [Any invariants, performance requirements, or gotchas]
 
-## Utility Functions (Full Code)
-[Small pure functions, helpers, validators — provide complete implementations since these are straightforward]
+**The key rule: each step contains ALL the files for that step — types, code, tests, re-exports — together.** The developer never has to jump between sections. They read Step 1, do Step 1. Read Step 2, do Step 2. Tests are colocated with the functions they test, not in a separate "Tests" section at the bottom.
 
-## Re-exports & Index Files (Full Code)
-[Complete index.ts files, barrel exports — pure boilerplate]
-
-## Tests
-[For each test file:]
-### `path/to/thing.test.ts`
-```ts
-// Full test code with exact expected values
-// Tests serve as the executable specification
-```
-
-## Configuration & Package Setup (Full Code)
-[package.json, tsconfig, tsup config — if creating a new package]
-
-## Integration Points
-[How this connects to existing code — what files need modification and what changes]
-```
+Each file block follows this format:
+- **`File: path/to/file.ts`** — exact path so the developer knows where to create it
+- A brief description of what the file does and why (so the developer can rename or restructure)
+- The code block (full code for boilerplate, guided stub for logic)
+- For guided stubs: purpose, algorithm notes, and edge cases appear directly below that code block
 
 #### What Gets Full Code vs Guided Stubs
+
+These appear inline within each step — not in separate sections.
 
 **Full code (copy-paste ready):**
 - TypeScript types and interfaces **that are used by functions or tests in this spec**
@@ -182,6 +229,12 @@ export function functionName(params: Type): ReturnType {
 - Functions with complex conditional logic
 - Anything where the developer's judgment and context matters
 
+For guided stubs, provide inline with the step:
+- The exact function signature with types
+- A `throw new Error("Not implemented")` body
+- A JSDoc comment summarizing purpose
+- Directly below the code block: purpose, algorithm notes, edge cases, constraints
+
 **Never include:**
 - Interface fields that no function in this spec reads, writes, or tests
 - Types imported but never referenced in any code block
@@ -191,11 +244,22 @@ export function functionName(params: Type): ReturnType {
 
 **Self-check before finalizing:** For every type, interface field, function, and constant in the spec, ask: "What code *in this spec* uses this?" If the answer is nothing, remove it.
 
-For guided stubs, provide:
-- The exact function signature with types
-- A `throw new Error("Not implemented")` body
-- A JSDoc comment summarizing purpose
-- Below the code block: algorithm notes, edge cases, constraints
+### Phase 4.5: Review Build Order
+
+After writing the spec but before presenting it to the developer, review the implementation order to verify it follows the testable-at-every-step paradigm:
+
+**Checklist (internal — do this before presenting the spec):**
+1. Can the developer run `build` after Step 1? (Must be yes — scaffolding/config)
+2. Can the developer import the public API after Step 2? (Must be yes — entry point exists)
+3. Can the developer run `test` after Step 3? (Must be yes — test shell exists)
+4. For each subsequent step: does the step end with "run tests" and do all prior tests still pass?
+5. Does any step require the developer to build multiple unrelated files before they can test anything? (Must be no — split it into smaller steps)
+6. Does the last step wire everything together and run the full suite?
+
+If any answer is wrong, restructure the steps. Common fixes:
+- **Move the entry point earlier** — even with hardcoded returns, having the public API exist lets the developer verify imports and types
+- **Split large steps** — if a step creates 3 files that all depend on each other, it's too big
+- **Add intermediate wiring** — after implementing function X, immediately show the edit to the entry point that replaces the hardcoded value with the real call
 
 ### Phase 5: Review with Developer
 
@@ -226,5 +290,7 @@ Review the spec and let me know if anything needs adjustment.
 - **Edge cases are explicit.** Don't leave the developer guessing. List every edge case you found during Phase 3.
 - **No hand-waving.** If a function needs to produce specific output, show what that output looks like in a test. If a type has constraints, document them in JSDoc.
 - **Respect the codebase.** Match existing conventions for naming, file organization, and patterns. Don't introduce new conventions without flagging it.
-- **Implementation order matters.** Structure the spec so each phase builds on the last. The developer should never have to jump around.
+- **Implementation order matters.** Structure the spec so each step builds on the last. The developer should never have to jump around.
+- **Testable at every step.** After completing any step, `build` and `test` must work. Start from the entry point with hardcoded values, then progressively swap in real implementations. Never make the developer build 5 files before they can test anything.
+- **Task checkboxes in every step.** Each step has `- [ ]` checkboxes for every file and verification action. The developer tracks progress directly in the spec file.
 - **Scope is a feature.** A tight spec that covers its scope completely is better than a broad spec that covers everything partially. Defer aggressively to future specs.
