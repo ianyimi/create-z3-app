@@ -1731,26 +1731,48 @@ function getAdditionalProviders() {
 // src/installers/string-utils.ts
 import fs3 from "fs-extra";
 var DEFAULT_THEME = `:root {
-  --background: 100% 0.000 0;
-  --foreground: 3.9% 0.006 240;
-  --card: 100% 0.000 0;
-  --card-foreground: 3.9% 0.006 240;
-  --popover: 100% 0.000 0;
-  --popover-foreground: 3.9% 0.006 240;
-  --primary: 10% 0.003 240;
-  --primary-foreground: 98% 0.000 0;
-  --secondary: 95.9% 0.002 240;
-  --secondary-foreground: 10% 0.003 240;
-  --muted: 95.9% 0.002 240;
-  --muted-foreground: 46.1% 0.002 240;
-  --accent: 95.9% 0.002 240;
-  --accent-foreground: 10% 0.003 240;
-  --destructive: 60.2% 0.168 0;
-  --destructive-foreground: 98% 0.000 0;
-  --border: 90% 0.003 240;
-  --input: 90% 0.003 240;
-  --ring: 10% 0.003 240;
+  --background: oklch(100% 0.000 0);
+  --foreground: oklch(3.9% 0.006 240);
+  --card: oklch(100% 0.000 0);
+  --card-foreground: oklch(3.9% 0.006 240);
+  --popover: oklch(100% 0.000 0);
+  --popover-foreground: oklch(3.9% 0.006 240);
+  --primary: oklch(10% 0.003 240);
+  --primary-foreground: oklch(98% 0.000 0);
+  --secondary: oklch(95.9% 0.002 240);
+  --secondary-foreground: oklch(10% 0.003 240);
+  --muted: oklch(95.9% 0.002 240);
+  --muted-foreground: oklch(46.1% 0.002 240);
+  --accent: oklch(95.9% 0.002 240);
+  --accent-foreground: oklch(10% 0.003 240);
+  --destructive: oklch(60.2% 0.168 0);
+  --destructive-foreground: oklch(98% 0.000 0);
+  --border: oklch(90% 0.003 240);
+  --input: oklch(90% 0.003 240);
+  --ring: oklch(10% 0.003 240);
   --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(3.9% 0.006 240);
+  --foreground: oklch(98% 0.000 0);
+  --card: oklch(3.9% 0.006 240);
+  --card-foreground: oklch(98% 0.000 0);
+  --popover: oklch(3.9% 0.006 240);
+  --popover-foreground: oklch(98% 0.000 0);
+  --primary: oklch(98% 0.000 0);
+  --primary-foreground: oklch(10% 0.003 240);
+  --secondary: oklch(14.9% 0.003 240);
+  --secondary-foreground: oklch(98% 0.000 0);
+  --muted: oklch(14.9% 0.003 240);
+  --muted-foreground: oklch(63.9% 0.002 240);
+  --accent: oklch(14.9% 0.003 240);
+  --accent-foreground: oklch(98% 0.000 0);
+  --destructive: oklch(30.6% 0.122 0);
+  --destructive-foreground: oklch(98% 0.000 0);
+  --border: oklch(14.9% 0.003 240);
+  --input: oklch(14.9% 0.003 240);
+  --ring: oklch(83.9% 0.000 0);
 }`;
 function detectIndentation(line) {
   const match = line.match(/^(\s*)/);

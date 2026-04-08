@@ -1,6 +1,6 @@
 {
   "name": "create-z3",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "type": "module",
   "description": "CLI for scaffolding Z3 Stack applications (TanStack/Next.js + Convex + Better Auth)",
   "bin": {
@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
     "dev": "tsup src/index.ts --format esm --watch",
+    "prepublishOnly": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
