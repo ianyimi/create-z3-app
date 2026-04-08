@@ -3,20 +3,24 @@ import { TerminalIcon, UserIcon } from 'lucide-react'
 
 import { signOut, useSession } from '~/lib/auth/client'
 import { Button } from '~/components/ui/button'
+import { ThemeToggle } from '~/components/ui/theme-toggle'
 
 export function ComponentExample() {
   const { data: session } = useSession()
 
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8 p-6 text-center">
-      {session?.user && (
-        <div className="absolute top-4 right-4 flex items-center gap-2">
-          <div className="bg-muted flex size-8 items-center justify-center rounded-full">
-            <UserIcon className="text-muted-foreground size-4" />
-          </div>
-          <span className="text-sm font-medium">{session.user.name}</span>
-        </div>
-      )}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        {session?.user && (
+          <>
+            <div className="bg-muted flex size-8 items-center justify-center rounded-full">
+              <UserIcon className="text-muted-foreground size-4" />
+            </div>
+            <span className="text-sm font-medium">{session.user.name}</span>
+          </>
+        )}
+        <ThemeToggle />
+      </div>
 
       <div className="flex flex-col items-center gap-4">
         <div className="bg-foreground text-background flex size-14 items-center justify-center rounded-2xl">
@@ -35,12 +39,8 @@ export function ComponentExample() {
           <Button variant="outline" onClick={() => signOut()}>Sign out</Button>
         ) : (
           <>
-            <Button asChild>
-              <Link to="/auth/$authView" params={{ authView: 'sign-up' }}>Sign up</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/auth/$authView" params={{ authView: 'sign-in' }}>Sign in</Link>
-            </Button>
+            <Button nativeButton={false} render={<Link to="/auth/$authView" params={{ authView: 'sign-up' }} />}>Sign up</Button>
+            <Button nativeButton={false} variant="outline" render={<Link to="/auth/$authView" params={{ authView: 'sign-in' }} />}>Sign in</Button>
           </>
         )}
       </div>

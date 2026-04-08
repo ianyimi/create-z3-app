@@ -21,26 +21,50 @@ import type { Framework, OAuthProvider } from './types.js';
  * - C (Chroma): 0-0.4 (typical range)
  * - H (Hue): 0-360 degrees
  */
-export const DEFAULT_THEME = `--background: 100% 0.000 0;
---foreground: 3.9% 0.006 240;
---card: 100% 0.000 0;
---card-foreground: 3.9% 0.006 240;
---popover: 100% 0.000 0;
---popover-foreground: 3.9% 0.006 240;
---primary: 10% 0.003 240;
---primary-foreground: 98% 0.000 0;
---secondary: 95.9% 0.002 240;
---secondary-foreground: 10% 0.003 240;
---muted: 95.9% 0.002 240;
---muted-foreground: 46.1% 0.002 240;
---accent: 95.9% 0.002 240;
---accent-foreground: 10% 0.003 240;
---destructive: 60.2% 0.168 0;
---destructive-foreground: 98% 0.000 0;
---border: 90% 0.003 240;
---input: 90% 0.003 240;
---ring: 10% 0.003 240;
---radius: 0.5rem;`;
+export const DEFAULT_THEME = `:root {
+  --background: 100% 0.000 0;
+  --foreground: 3.9% 0.006 240;
+  --card: 100% 0.000 0;
+  --card-foreground: 3.9% 0.006 240;
+  --popover: 100% 0.000 0;
+  --popover-foreground: 3.9% 0.006 240;
+  --primary: 10% 0.003 240;
+  --primary-foreground: 98% 0.000 0;
+  --secondary: 95.9% 0.002 240;
+  --secondary-foreground: 10% 0.003 240;
+  --muted: 95.9% 0.002 240;
+  --muted-foreground: 46.1% 0.002 240;
+  --accent: 95.9% 0.002 240;
+  --accent-foreground: 10% 0.003 240;
+  --destructive: 60.2% 0.168 0;
+  --destructive-foreground: 98% 0.000 0;
+  --border: 90% 0.003 240;
+  --input: 90% 0.003 240;
+  --ring: 10% 0.003 240;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 3.9% 0.006 240;
+  --foreground: 98% 0.000 0;
+  --card: 3.9% 0.006 240;
+  --card-foreground: 98% 0.000 0;
+  --popover: 3.9% 0.006 240;
+  --popover-foreground: 98% 0.000 0;
+  --primary: 98% 0.000 0;
+  --primary-foreground: 10% 0.003 240;
+  --secondary: 14.9% 0.003 240;
+  --secondary-foreground: 98% 0.000 0;
+  --muted: 14.9% 0.003 240;
+  --muted-foreground: 63.9% 0.002 240;
+  --accent: 14.9% 0.003 240;
+  --accent-foreground: 98% 0.000 0;
+  --destructive: 30.6% 0.122 0;
+  --destructive-foreground: 98% 0.000 0;
+  --border: 14.9% 0.003 240;
+  --input: 14.9% 0.003 240;
+  --ring: 83.9% 0.000 0;
+}`;
 
 /**
  * Detects the indentation (leading whitespace) of a line

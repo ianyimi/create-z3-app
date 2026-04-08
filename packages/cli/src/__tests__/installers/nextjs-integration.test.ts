@@ -430,8 +430,8 @@ describe('Task Group 9: Next.js Integration Tests', () => {
       // Verify placeholder is removed
       expect(cssContent).not.toContain('/* {{TWEAKCN_THEME}} */');
 
-      // Template uses @theme inline for CSS variables (no :root block)
-      // Variables are injected directly at the placeholder location
+      // Verify :root block exists (DEFAULT_THEME wraps vars in :root {})
+      expect(cssContent).toContain(':root {');
     });
 
     it('should apply custom CSS theme content', async () => {

@@ -1730,26 +1730,28 @@ function getAdditionalProviders() {
 
 // src/installers/string-utils.ts
 import fs3 from "fs-extra";
-var DEFAULT_THEME = `--background: 100% 0.000 0;
---foreground: 3.9% 0.006 240;
---card: 100% 0.000 0;
---card-foreground: 3.9% 0.006 240;
---popover: 100% 0.000 0;
---popover-foreground: 3.9% 0.006 240;
---primary: 10% 0.003 240;
---primary-foreground: 98% 0.000 0;
---secondary: 95.9% 0.002 240;
---secondary-foreground: 10% 0.003 240;
---muted: 95.9% 0.002 240;
---muted-foreground: 46.1% 0.002 240;
---accent: 95.9% 0.002 240;
---accent-foreground: 10% 0.003 240;
---destructive: 60.2% 0.168 0;
---destructive-foreground: 98% 0.000 0;
---border: 90% 0.003 240;
---input: 90% 0.003 240;
---ring: 10% 0.003 240;
---radius: 0.5rem;`;
+var DEFAULT_THEME = `:root {
+  --background: 100% 0.000 0;
+  --foreground: 3.9% 0.006 240;
+  --card: 100% 0.000 0;
+  --card-foreground: 3.9% 0.006 240;
+  --popover: 100% 0.000 0;
+  --popover-foreground: 3.9% 0.006 240;
+  --primary: 10% 0.003 240;
+  --primary-foreground: 98% 0.000 0;
+  --secondary: 95.9% 0.002 240;
+  --secondary-foreground: 10% 0.003 240;
+  --muted: 95.9% 0.002 240;
+  --muted-foreground: 46.1% 0.002 240;
+  --accent: 95.9% 0.002 240;
+  --accent-foreground: 10% 0.003 240;
+  --destructive: 60.2% 0.168 0;
+  --destructive-foreground: 98% 0.000 0;
+  --border: 90% 0.003 240;
+  --input: 90% 0.003 240;
+  --ring: 10% 0.003 240;
+  --radius: 0.5rem;
+}`;
 function detectIndentation(line) {
   const match = line.match(/^(\s*)/);
   return match ? match[1] : "";
