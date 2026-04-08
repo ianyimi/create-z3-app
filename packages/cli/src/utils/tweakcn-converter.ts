@@ -319,7 +319,7 @@ function generateCSSOutput(
     const rootDeclarations = rootColors
       .map(color => {
         const value = format === 'oklch' && color.oklch && isColorValue(color.value)
-          ? color.oklch
+          ? `oklch(${color.oklch})`
           : color.value;
         return `  ${color.name}: ${value};`;
       })
@@ -333,7 +333,7 @@ function generateCSSOutput(
     const darkDeclarations = darkColors
       .map(color => {
         const value = format === 'oklch' && color.oklch && isColorValue(color.value)
-          ? color.oklch
+          ? `oklch(${color.oklch})`
           : color.value;
         return `  ${color.name}: ${value};`;
       })

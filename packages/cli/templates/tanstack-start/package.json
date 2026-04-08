@@ -13,6 +13,7 @@
     "format": "prettier --write . --cache",
     "format:check": "prettier --check . --cache",
     "validate": "pnpm run typecheck && pnpm run lint && pnpm run format:check",
+    "convex": "convex",
     "secret:create": "openssl rand -hex 32 | tr -d '\\n' | pbcopy && echo '✅ Secret generated and copied to clipboard!'"
   },
   "dependencies": {

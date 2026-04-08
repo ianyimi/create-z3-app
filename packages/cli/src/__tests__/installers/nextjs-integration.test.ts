@@ -418,8 +418,8 @@ describe('Task Group 9: Next.js Integration Tests', () => {
       const cssContent = readFileSync(cssFilePath, 'utf-8');
 
       // Verify OKLCH format colors are present
-      // DEFAULT_THEME uses OKLCH format (L% C H format)
-      expect(cssContent).toMatch(/--[\w-]+:\s*[\d.]+%\s+[\d.]+\s+[\d.]+;/);
+      // DEFAULT_THEME uses full oklch() values
+      expect(cssContent).toMatch(/--[\w-]+:\s*oklch\([\d.]+%?\s+[\d.]+\s+[\d.]+\);/);
 
       // Verify common theme variables exist
       expect(cssContent).toContain('--background:');

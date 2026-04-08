@@ -159,7 +159,7 @@ describe('TweakCN OKLCH Converter', () => {
         });
 
         expect(result).toContain('--color:');
-        expect(result).toContain('59.75% 0.196 254.28');
+        expect(result).toContain('oklch(59.75% 0.196 254.28)');
       });
     });
 
