@@ -16,7 +16,6 @@ const config = defineConfig({
   plugins: [
     devtools(),
     nitro(),
-    // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
@@ -26,7 +25,21 @@ const config = defineConfig({
   ],
   ssr: {
     noExternal: ["@convex-dev/better-auth"]
-  }
+  },
+  optimizeDeps: {
+    // @daveyplate/better-auth-ui is only imported by the lazy-loaded auth route.
+    // Without explicit inclusion, Vite discovers it on first visit and triggers
+    // a second esbuild optimization run — creating a separate copy of the chunk
+    // that contains AuthUIContext, separate from the copy already bundled with
+    // @daveyplate/better-auth-ui/tanstack (from providers.tsx).
+    // Two context instances = empty auth forms.
+    // Explicitly including both packages guarantees they land in the same initial
+    // esbuild run so they share a single AuthUIContext chunk.
+    include: [
+      '@daveyplate/better-auth-ui',
+      '@daveyplate/better-auth-ui/tanstack',
+    ],
+  },
 })
 
 export default config

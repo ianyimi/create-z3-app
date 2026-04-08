@@ -23,6 +23,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <AuthQueryProvider>
         <AuthUIProviderTanstack
           authClient={authClient}
+          classNames={{ card: "border border-border" }}
           /* {{EMAIL_PASSWORD_CREDENTIALS}} */
           navigate={(href) => router.navigate({ href })}
           replace={(href) => router.navigate({ href, replace: true })}
