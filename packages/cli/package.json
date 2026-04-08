@@ -1,6 +1,6 @@
 {
   "name": "create-z3",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "type": "module",
   "description": "CLI for scaffolding Z3 Stack applications (TanStack/Next.js + Convex + Better Auth)",
   "bin": {

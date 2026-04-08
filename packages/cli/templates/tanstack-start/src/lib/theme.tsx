@@ -34,7 +34,7 @@ type SavedTheme = z.infer<typeof postThemeValidator>
 const storageKey = "_preffered-theme"
 
 export const getThemeServerFn = createServerFn().handler(
-  async () => (getCookie(storageKey) || "light") as SavedTheme
+  async () => (getCookie(storageKey) || "system") as SavedTheme
 )
 
 export const setThemeServerFn = createServerFn({ method: "POST" })
@@ -84,7 +84,7 @@ const themeScript: string = (function () {
         return undefined
       }
 
-      const storedTheme = getCookie('_preffered-theme') ?? 'light';
+      const storedTheme = getCookie('_preffered-theme') ?? 'system';
       const validTheme = ['light', 'dark', 'system'].includes(storedTheme) ? storedTheme : 'light';
 
       if (validTheme === 'system') {
