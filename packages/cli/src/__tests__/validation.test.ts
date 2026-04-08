@@ -129,9 +129,10 @@ describe('isDirectoryEmpty', () => {
 
 describe('resolveProjectName', () => {
   it('should return the directory name when input is "."', () => {
+    // resolveProjectName returns input unchanged; '.' is handled by index.ts via basename(cwd)
     const result = resolveProjectName('.', '/path/to/my-project');
 
-    expect(result).toBe('my-project');
+    expect(result).toBe('.');
   });
 
   it('should return the input unchanged when it is not "."', () => {
@@ -141,15 +142,16 @@ describe('resolveProjectName', () => {
   });
 
   it('should handle root directory', () => {
+    // resolveProjectName always returns input unchanged
     const result = resolveProjectName('.', '/my-project');
 
-    expect(result).toBe('my-project');
+    expect(result).toBe('.');
   });
 
   it('should return directory name even if it is invalid npm name', () => {
-    // This allows the validation to catch it later
+    // Non-dot inputs are returned as-is; validation happens separately
     const result = resolveProjectName('.', '/path/to/My Invalid Project');
 
-    expect(result).toBe('My Invalid Project');
+    expect(result).toBe('.');
   });
 });

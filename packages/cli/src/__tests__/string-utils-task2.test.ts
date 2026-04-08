@@ -135,9 +135,9 @@ describe('Task Group 2: String Utils Enhancements', () => {
       // Should include OAuth providers in socialProviders object
       expect(result).toContain('socialProviders: {');
       expect(result).toContain('google: {');
-      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID as string');
+      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID!');
       expect(result).toContain('github: {');
-      expect(result).toContain('clientId: process.env.GITHUB_CLIENT_ID as string');
+      expect(result).toContain('clientId: process.env.GITHUB_CLIENT_ID!');
     });
 
     it('should generate only email/password when OAuth providers empty', () => {
@@ -153,17 +153,17 @@ describe('Task Group 2: String Utils Enhancements', () => {
     it('should generate only OAuth when email/password disabled', () => {
       const result = generateAuthProvidersBlock(['google'], false);
 
-      // Should only include OAuth providers in socialProviders object
+      // Only includes OAuth socialProviders (no emailAndPassword when disabled)
       expect(result).toContain('socialProviders: {');
       expect(result).toContain('google: {');
-      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID as string');
-      expect(result).not.toContain('emailAndPassword');
+      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID!');
+      expect(result).not.toContain('emailAndPassword: {');
     });
 
     it('should return empty string when both are disabled/empty', () => {
       const result = generateAuthProvidersBlock([], false);
 
-      // Should return empty string to trigger line removal
+      // Returns empty string when nothing is configured (triggers placeholder line removal)
       expect(result).toBe('');
     });
 
@@ -199,8 +199,8 @@ describe('Task Group 2: String Utils Enhancements', () => {
     it('should return removal marker when providers array is empty', () => {
       const result = generateOAuthUIProvidersBlock([]);
 
-      // Should return special removal marker
-      expect(result).toBe('__REMOVE_SOCIAL_PROP__');
+      // Returns empty string when no providers (triggers line removal in replacePlaceholder)
+      expect(result).toBe('');
     });
 
     it('should use double quotes for provider IDs', () => {
@@ -252,7 +252,7 @@ describe('Task Group 2: String Utils Enhancements', () => {
       expect(result).not.toContain('// {{AUTH_PROVIDERS}}');
       expect(result).toContain('socialProviders: {');
       expect(result).toContain('google: {');
-      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID as string');
+      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID!');
       expect(result).not.toContain('emailAndPassword');
     });
 
@@ -270,10 +270,11 @@ describe('Task Group 2: String Utils Enhancements', () => {
 
       const result = await fs.readFile(testFile, 'utf-8');
 
-      // Placeholder line should be completely removed
+      // Placeholder line should be completely removed (empty string triggers line removal)
       expect(result).not.toContain('// {{AUTH_PROVIDERS}}');
-      // Empty providers array should remain clean
-      expect(result).toContain('providers: [\n  ]');
+      // No auth config should be present
+      expect(result).not.toContain('emailAndPassword');
+      expect(result).not.toContain('socialProviders');
     });
 
     it('should remove social prop line when no OAuth providers', async () => {

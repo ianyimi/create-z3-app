@@ -53,7 +53,7 @@ export const getSessionWithUser = query({
 				email: user.email,
 				emailVerified: user.emailVerified,
 				image: user.image,
-				role: user.role,
+				roles: user.roles,
 			},
 		};
 	},

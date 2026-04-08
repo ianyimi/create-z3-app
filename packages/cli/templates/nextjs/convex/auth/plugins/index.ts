@@ -1,5 +1,6 @@
 import { nextCookies } from "better-auth/next-js"
-import { admin, apiKey } from "better-auth/plugins"
+import { admin } from "better-auth/plugins"
+import { apiKey } from "@better-auth/api-key"
 import { convex } from "@convex-dev/better-auth/plugins"
 import { USER_ROLES } from "~/db/constants"
 import authConfig from "@convex/auth.config"

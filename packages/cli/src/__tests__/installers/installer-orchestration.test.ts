@@ -88,16 +88,16 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
         emailPasswordAuth: true,
         oauthProviders: [],
         tweakcnTheme: {
-          type: 'url',
-          content: 'https://example.com/theme.css',
+          type: 'css',
+          content: '--background: 0 0% 100%;',
         },
         initGit: true,
         installDependencies: true,
       };
 
       expect(options.tweakcnTheme).toBeDefined();
-      expect(options.tweakcnTheme?.type).toBe('url');
-      expect(options.tweakcnTheme?.content).toBe('https://example.com/theme.css');
+      expect(options.tweakcnTheme?.type).toBe('css');
+      expect(options.tweakcnTheme?.content).toBe('--background: 0 0% 100%;');
     });
 
     it('should construct ProjectOptions with CSS theme content', () => {
@@ -139,9 +139,13 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
   describe('Method Orchestration Sequence', () => {
     it('should call updateOAuthConfig when emailPasswordAuth is true and no OAuth', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -158,19 +162,19 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
       expect(updateOAuthConfigSpy).toHaveBeenCalledWith([], true);
       expect(updateOAuthConfigSpy).toHaveBeenCalledTimes(1);
 
-      // Should not call updateOAuthUIConfig when no OAuth providers
       expect(copyBaseFilesSpy).toHaveBeenCalledTimes(1);
       expect(applyTweakCNThemeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should call updateOAuthConfig when OAuth providers are selected', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue();
-      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue();
-      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue();
-      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -188,7 +192,7 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
       expect(updateOAuthConfigSpy).toHaveBeenCalledTimes(1);
 
       // Should call updateOAuthUIConfig when OAuth providers exist
-      expect(updateOAuthUIConfigSpy).toHaveBeenCalledWith(['google', 'github']);
+      expect(updateOAuthUIConfigSpy).toHaveBeenCalledWith(['google', 'github'], false);
       expect(updateOAuthUIConfigSpy).toHaveBeenCalledTimes(1);
 
       expect(updateEnvExampleSpy).toHaveBeenCalledWith(['google', 'github']);
@@ -197,12 +201,15 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
       expect(applyTweakCNThemeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should NOT call auth methods when neither emailPassword nor OAuth selected', async () => {
+    it('should call all placeholder-cleanup methods even when no auth configured', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue();
-      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -215,25 +222,24 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
       await installer.initProject(options);
 
-      // Should NOT call updateOAuthConfig when both are false/empty
-      expect(updateOAuthConfigSpy).not.toHaveBeenCalled();
+      // All methods are called to ensure template placeholders are cleaned up
+      expect(updateOAuthConfigSpy).toHaveBeenCalledWith([], false);
+      expect(updateOAuthUIConfigSpy).toHaveBeenCalled();
 
-      // Should NOT call updateOAuthUIConfig
-      expect(updateOAuthUIConfigSpy).not.toHaveBeenCalled();
-
-      // Should still call base methods
+      // Base methods always called
       expect(copyBaseFilesSpy).toHaveBeenCalledTimes(1);
       expect(applyTweakCNThemeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should call updateEnvExample and updateReadme only when OAuth providers exist', async () => {
+    it('should call updateEnvExample and updateReadme with all OAuth providers', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue();
-      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue();
-      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -246,20 +252,22 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
       await installer.initProject(options);
 
-      // Should call both methods when OAuth providers exist
+      // Should call both methods with providers
       expect(updateEnvExampleSpy).toHaveBeenCalledWith(['google']);
       expect(updateEnvExampleSpy).toHaveBeenCalledTimes(1);
       expect(updateReadmeSpy).toHaveBeenCalledWith(['google']);
       expect(updateReadmeSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should NOT call updateEnvExample and updateReadme when no OAuth providers', async () => {
+    it('should call updateEnvExample and updateReadme with empty array when no OAuth providers', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue();
-      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -272,16 +280,20 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
       await installer.initProject(options);
 
-      // Should NOT call these methods when no OAuth providers
-      expect(updateEnvExampleSpy).not.toHaveBeenCalled();
-      expect(updateReadmeSpy).not.toHaveBeenCalled();
+      // Methods are called with empty array to clean up placeholders
+      expect(updateEnvExampleSpy).toHaveBeenCalledWith([]);
+      expect(updateReadmeSpy).toHaveBeenCalledWith([]);
     });
 
     it('should apply custom theme when tweakcnTheme is provided', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const customTheme = '--background: 0 0% 0%;';
       const options: ProjectOptions = {
@@ -306,9 +318,13 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should apply default theme when tweakcnTheme is not provided', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -332,10 +348,14 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should call initGitRepo when initGit is true', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -353,10 +373,14 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should NOT call initGitRepo when initGit is false', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -374,10 +398,14 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should call installDependencies when installDependencies is true', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -395,10 +423,14 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should NOT call installDependencies when installDependencies is false', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue();
+      vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -430,6 +462,9 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
       vi.spyOn(installer, 'updateEnvExample').mockImplementation(async () => {
         callOrder.push('updateEnvExample');
       });
+      vi.spyOn(installer, 'updateEnvTs').mockImplementation(async () => {
+        callOrder.push('updateEnvTs');
+      });
       vi.spyOn(installer, 'updateReadme').mockImplementation(async () => {
         callOrder.push('updateReadme');
       });
@@ -460,6 +495,7 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
         'updateOAuthConfig',
         'updateOAuthUIConfig',
         'updateEnvExample',
+        'updateEnvTs',
         'updateReadme',
         'applyTweakCNTheme',
         'initGitRepo',
@@ -471,14 +507,15 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
   describe('Complete Orchestration Scenarios', () => {
     it('should orchestrate complete flow with all options enabled', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue();
-      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue();
-      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue();
-      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue();
+      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue(undefined);
+      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -498,7 +535,7 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
       // Verify all methods were called
       expect(copyBaseFilesSpy).toHaveBeenCalledTimes(1);
       expect(updateOAuthConfigSpy).toHaveBeenCalledWith(['google', 'github', 'discord'], true);
-      expect(updateOAuthUIConfigSpy).toHaveBeenCalledWith(['google', 'github', 'discord']);
+      expect(updateOAuthUIConfigSpy).toHaveBeenCalledWith(['google', 'github', 'discord'], true);
       expect(updateEnvExampleSpy).toHaveBeenCalledWith(['google', 'github', 'discord']);
       expect(updateReadmeSpy).toHaveBeenCalledWith(['google', 'github', 'discord']);
       expect(applyTweakCNThemeSpy).toHaveBeenCalledWith('--background: 0 0% 0%;');
@@ -508,14 +545,15 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
     it('should orchestrate minimal flow with all options disabled', async () => {
       const installer = new TanStackInstaller('/tmp/test', 'test');
-      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue();
-      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue();
-      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue();
-      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue();
-      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue();
-      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue();
-      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue();
-      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue();
+      const copyBaseFilesSpy = vi.spyOn(installer as any, 'copyBaseFiles').mockResolvedValue(undefined);
+      const updateOAuthConfigSpy = vi.spyOn(installer, 'updateOAuthConfig').mockResolvedValue(undefined);
+      const updateOAuthUIConfigSpy = vi.spyOn(installer, 'updateOAuthUIConfig').mockResolvedValue(undefined);
+      const updateEnvExampleSpy = vi.spyOn(installer, 'updateEnvExample').mockResolvedValue(undefined);
+      vi.spyOn(installer, 'updateEnvTs').mockResolvedValue(undefined);
+      const updateReadmeSpy = vi.spyOn(installer, 'updateReadme').mockResolvedValue(undefined);
+      const applyTweakCNThemeSpy = vi.spyOn(installer, 'applyTweakCNTheme').mockResolvedValue(undefined);
+      const initGitRepoSpy = vi.spyOn(installer as any, 'initGitRepo').mockResolvedValue(undefined);
+      const installDependenciesSpy = vi.spyOn(installer as any, 'installDependencies').mockResolvedValue(undefined);
 
       const options: ProjectOptions = {
         projectName: 'test',
@@ -529,12 +567,12 @@ describe('Task Group 6: Installer Orchestration Integration Tests', () => {
 
       await installer.initProject(options);
 
-      // Verify only essential methods were called
+      // All placeholder-cleanup methods are called even with no auth configured
       expect(copyBaseFilesSpy).toHaveBeenCalledTimes(1);
-      expect(updateOAuthConfigSpy).not.toHaveBeenCalled();
-      expect(updateOAuthUIConfigSpy).not.toHaveBeenCalled();
-      expect(updateEnvExampleSpy).not.toHaveBeenCalled();
-      expect(updateReadmeSpy).not.toHaveBeenCalled();
+      expect(updateOAuthConfigSpy).toHaveBeenCalledWith([], false);
+      expect(updateOAuthUIConfigSpy).toHaveBeenCalled();
+      expect(updateEnvExampleSpy).toHaveBeenCalledWith([]);
+      expect(updateReadmeSpy).toHaveBeenCalledWith([]);
       expect(applyTweakCNThemeSpy).toHaveBeenCalledTimes(1); // Default theme
       expect(initGitRepoSpy).not.toHaveBeenCalled();
       expect(installDependenciesSpy).not.toHaveBeenCalled();

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification Report: Better Auth 1.5 Migration</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.6; }
+    h1 { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+    h2 { margin-top: 2rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
+    h3 { margin-top: 1.25rem; color: #374151; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { border: 1px solid #d1d5db; padding: 0.5rem 0.75rem; text-align: left; }
+    th { background: #f9fafb; font-weight: 600; }
+    .pass { color: #16a34a; font-weight: 600; }
+    .warn { color: #d97706; font-weight: 600; }
+    .fail { color: #dc2626; font-weight: 600; }
+    code { background: #f3f4f6; padding: 0.15rem 0.35rem; border-radius: 4px; font-size: 0.9em; font-family: monospace; }
+    pre { background: #f3f4f6; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85em; }
+    ul { padding-left: 1.5rem; }
+    li { margin: 0.25rem 0; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85em; font-weight: 600; }
+    .badge-pass { background: #dcfce7; color: #16a34a; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-fail { background: #fee2e2; color: #dc2626; }
+    .meta-table td { border: none; padding: 0.25rem 0.75rem 0.25rem 0; }
+    .meta-table tr:first-child td { padding-top: 0; }
+  </style>
+</head>
+<body>
+
+<h1>Verification Report: Better Auth 1.5 Migration</h1>
+
+<table class="meta-table">
+  <tr><td><strong>Spec</strong></td><td><code>2026-04-08-better-auth-1-5-migration</code></td></tr>
+  <tr><td><strong>Date</strong></td><td>2026-04-08</td></tr>
+  <tr><td><strong>Verifier</strong></td><td>implementation-verifier</td></tr>
+  <tr><td><strong>Status</strong></td><td><span class="badge badge-warn">Passed with Issues</span></td></tr>
+</table>
+
+<hr />
+
+<h2>Executive Summary</h2>
+
+<p>
+  The Better Auth 1.5 migration has been fully implemented across both
+  <code>tmp/my-app/</code> and the canonical template at
+  <code>packages/cli/templates/tanstack-start/</code>. All five task groups are
+  complete and verified: dependency bumps, adapter config, plugin imports, schema
+  additions, and template parity. TypeScript compilation in <code>tmp/my-app/</code>
+  passes with zero errors. The only issues noted are pre-existing test failures in
+  <code>packages/cli</code> (14 of 124 tests fail) that are unrelated to this
+  migration, and the absence of a <code>.env.local</code> file which is expected for a
+  dev setup that has not yet been provisioned.
+</p>
+
+<hr />
+
+<h2>1. Tasks Verification</h2>
+
+<p><strong>Status:</strong> <span class="pass">All Complete</span></p>
+
+<h3>Completed Tasks</h3>
+<ul>
+  <li><strong>[x] Task Group 1: Update <code>tmp/my-app</code> Dependencies</strong>
+    <ul>
+      <li>[x] <code>better-auth</code> bumped to <code>^1.5.0</code></li>
+      <li>[x] <code>@convex-dev/better-auth</code> bumped to <code>^0.11.0</code></li>
+      <li>[x] <code>@better-auth/api-key</code> added at <code>^1.0.0</code></li>
+      <li>[x] <code>pnpm install</code> completed (lockfile present, no peer dep conflicts observed)</li>
+    </ul>
+  </li>
+  <li><strong>[x] Task Group 2: Update Custom Convex Adapter Config</strong>
+    <ul>
+      <li>[x] <code>supportsArrays: true</code> present in adapter config object</li>
+      <li>[x] <code>customTransformInput</code> contains only date handling — no array-coercion block</li>
+    </ul>
+  </li>
+  <li><strong>[x] Task Group 3: Migrate <code>apiKey</code> Plugin Import + Add <code>convex()</code> Plugin</strong>
+    <ul>
+      <li>[x] <code>apiKey</code> imported from <code>@better-auth/api-key</code> (not <code>better-auth/plugins</code>)</li>
+      <li>[x] <code>convex</code> imported from <code>@convex-dev/better-auth/plugins</code></li>
+      <li>[x] <code>authConfig</code> imported from <code>@convex/auth.config</code></li>
+      <li>[x] <code>convex({ authConfig })</code> present in plugins array</li>
+    </ul>
+  </li>
+  <li><strong>[x] Task Group 4: Add <code>apiKey</code> Table to Schema</strong>
+    <ul>
+      <li>[x] <code>TABLE_SLUG_API_KEYS = "apikey"</code> present in <code>src/db/constants/index.ts</code></li>
+      <li>[x] <code>apikey</code> table defined in <code>convex/schema.ts</code> with <code>referenceId</code>, <code>configId</code>, and all 1.5 fields</li>
+      <li>[x] No <code>userId</code> field on <code>apikey</code> table (correct 1.5 schema)</li>
+      <li>[x] TypeScript typecheck passes with zero errors</li>
+    </ul>
+  </li>
+  <li><strong>[x] Task Group 5: Port All Changes to Template Files</strong>
+    <ul>
+      <li>[x] <code>packages/cli/templates/tanstack-start/package.json</code> — identical versions to <code>tmp/my-app</code></li>
+      <li>[x] <code>packages/cli/templates/tanstack-start/convex/auth/adapter/index.ts</code> — identical to <code>tmp/my-app</code></li>
+      <li>[x] <code>packages/cli/templates/tanstack-start/convex/auth/plugins/index.ts</code> — identical to <code>tmp/my-app</code></li>
+      <li>[x] <code>packages/cli/templates/tanstack-start/src/db/constants/index.ts</code> — identical to <code>tmp/my-app</code></li>
+      <li>[x] <code>packages/cli/templates/tanstack-start/convex/schema.ts</code> — identical to <code>tmp/my-app</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Incomplete or Issues</h3>
+<p>None. All task groups and sub-tasks are complete.</p>
+
+<hr />
+
+<h2>2. Documentation Verification</h2>
+
+<p><strong>Status:</strong> <span class="warn">Issues Found</span></p>
+
+<h3>Implementation Documentation</h3>
+<p>
+  No <code>implementations/</code> sub-folder exists under the spec directory. The
+  spec directory contains only <code>planning/spec.md</code> and
+  <code>tasks.md</code>. Individual task implementation reports were not created.
+  This is noted as a documentation gap but does not affect the correctness of the
+  implementation.
+</p>
+
+<h3>Verification Documentation</h3>
+<p>This is the first and only verification document for this spec.</p>
+
+<h3>Missing Documentation</h3>
+<ul>
+  <li>No <code>implementations/</code> folder or per-task implementation reports</li>
+</ul>
+
+<hr />
+
+<h2>3. Roadmap Updates</h2>
+
+<p><strong>Status:</strong> <span class="warn">No Updates Needed</span></p>
+
+<p>
+  The Better Auth 1.5 migration is an internal dependency/version upgrade, not a
+  product feature tracked on the roadmap. A review of
+  <code>agent-os/product/roadmap.md</code> found no roadmap item that maps directly
+  to this migration spec. The existing roadmap items for Better Auth integration
+  (item 4, already checked) refer to the initial integration, not the 1.5 upgrade.
+  No roadmap changes are required.
+</p>
+
+<hr />
+
+<h2>4. Test Suite Results</h2>
+
+<p><strong>Status:</strong> <span class="warn">Some Failures (pre-existing, unrelated to migration)</span></p>
+
+<h3>Test Summary</h3>
+
+<table>
+  <thead>
+    <tr><th>Suite</th><th>Total</th><th>Passing</th><th>Failing</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tmp/my-app</code> (vitest)</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0 — no test files exist in this app</td>
+    </tr>
+    <tr>
+      <td><code>packages/cli</code> (vitest)</td>
+      <td>124</td>
+      <td>110</td>
+      <td>14</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Failed Tests — <code>packages/cli</code></h3>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Test Name</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>validation.test.ts</code></td>
+      <td>resolveProjectName &gt; should return the directory name when input is "."</td>
+      <td rowspan="3">resolveProjectName does not resolve "." to the parent folder name — pre-existing</td>
+    </tr>
+    <tr>
+      <td><code>validation.test.ts</code></td>
+      <td>resolveProjectName &gt; should handle root directory</td>
+    </tr>
+    <tr>
+      <td><code>validation.test.ts</code></td>
+      <td>resolveProjectName &gt; should return directory name even if it is invalid npm name</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task3.test.ts</code></td>
+      <td>generateOAuthConfigBlock &gt; should use betterAuthConfig.socialProvider from OAUTH_PROVIDERS</td>
+      <td>OAuth config block format mismatch — pre-existing</td>
+    </tr>
+    <tr>
+      <td><code>oauth-integration.test.ts</code></td>
+      <td>OAuth Config Block Generation &gt; should generate config for multiple providers</td>
+      <td rowspan="2">OAuth block format / provider defaults — pre-existing</td>
+    </tr>
+    <tr>
+      <td><code>oauth-integration.test.ts</code></td>
+      <td>Providers Requiring Extra Config &gt; should return empty array when no providers require extra config</td>
+    </tr>
+    <tr>
+      <td><code>tweakcn-converter.test.ts</code></td>
+      <td>convertTweakCNToOKLCH &gt; Non-color values &gt; should skip non-color CSS variables</td>
+      <td rowspan="2">TweakCN converter includes non-color CSS vars — pre-existing</td>
+    </tr>
+    <tr>
+      <td><code>tweakcn-converter.test.ts</code></td>
+      <td>Error handling &gt; should handle CSS with no color variables</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>generateAuthProvidersBlock &gt; combined email/password and OAuth config</td>
+      <td rowspan="6">Auth providers block generation format — pre-existing</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>generateAuthProvidersBlock &gt; only OAuth when email/password disabled</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>generateAuthProvidersBlock &gt; empty when both disabled/empty</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>generateOAuthUIProvidersBlock &gt; return removal marker when providers array is empty</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>Clean Code Generation &gt; without placeholders - OAuth only</td>
+    </tr>
+    <tr>
+      <td><code>string-utils-task2.test.ts</code></td>
+      <td>Clean Code Generation &gt; remove placeholder line when no auth methods selected</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Notes</h3>
+<ul>
+  <li>
+    All 14 failing tests are in <code>packages/cli</code> and are pre-existing failures
+    unrelated to this Better Auth 1.5 migration. They concern CLI string-generation
+    utilities, validation helpers, the TweakCN CSS converter, and the installer
+    orchestration — none of which were touched by this migration.
+  </li>
+  <li>
+    <code>tmp/my-app</code> has no test files; the vitest runner exits with code 1
+    ("No test files found") which is expected for a project template.
+  </li>
+  <li>
+    The TypeScript typecheck (<code>pnpm typecheck</code> in <code>tmp/my-app/</code>)
+    passes with zero errors, which is the most meaningful correctness signal for this
+    migration.
+  </li>
+  <li>
+    No <code>.env.local</code> or <code>.env</code> file exists in
+    <code>tmp/my-app/</code>. This is expected — the developer must copy
+    <code>.env.example</code> and supply Convex deployment credentials before running
+    <code>npx convex dev</code>. The startup will be blocked by missing env vars until
+    that step is performed. This is not a regression introduced by this migration.
+  </li>
+</ul>
+
+<hr />
+
+<h2>5. 1.4-era Pattern Audit</h2>
+
+<p><strong>Status:</strong> <span class="pass">Clean — no 1.4-era patterns found</span></p>
+
+<table>
+  <thead>
+    <tr><th>Pattern to eliminate</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>import { apiKey } from "better-auth/plugins"</code></td>
+      <td class="pass">Not present</td>
+    </tr>
+    <tr>
+      <td><code>import { apiKeyClient } from "better-auth/client/plugins"</code></td>
+      <td class="pass">Not present — correctly uses <code>@better-auth/api-key/client</code></td>
+    </tr>
+    <tr>
+      <td>Array-handling block in <code>customTransformInput</code></td>
+      <td class="pass">Not present — only date handling remains</td>
+    </tr>
+    <tr>
+      <td><code>userId</code> field on <code>apikey</code> table</td>
+      <td class="pass">Not present — replaced by <code>referenceId</code></td>
+    </tr>
+    <tr>
+      <td>Missing <code>supportsArrays</code> in adapter config</td>
+      <td class="pass"><code>supportsArrays: true</code> present</td>
+    </tr>
+    <tr>
+      <td>Missing <code>configId</code> field on <code>apikey</code> table</td>
+      <td class="pass"><code>configId: v.string()</code> present</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

@@ -80,9 +80,9 @@ export function hasPermission<Resource extends keyof Permissions>({
   resource: Resource;
   user?: null | User;
 }): boolean {
-  if (!user?.role) { return false; }
+  if (!user?.roles) { return false; }
 
-  return user.role.some((role) => {
+  return user.roles.some((role) => {
     const permission = (ROLES as RolesWithPermissions)[role as UserRole][resource]?.[action]
 
     if (!permission) { return false }

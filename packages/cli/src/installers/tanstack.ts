@@ -115,13 +115,13 @@ export class TanStackInstaller extends FrameworkInstaller {
     const envFilePath = join(this.targetPath, '.env.example');
     const envVarsBlock = generateEnvVarsBlock(selectedProviders, 'tanstack');
 
-    if (envVarsBlock) {
-      await replacePlaceholder(
-        envFilePath,
-        '# {{ENV_OAUTH_VARS}}',
-        envVarsBlock
-      );
-    }
+    // Always call to remove placeholder even when no providers selected
+    await replacePlaceholder(
+      envFilePath,
+      '# {{ENV_OAUTH_VARS}}',
+      envVarsBlock,
+      { graceful: true }
+    );
   }
 
   /**
@@ -136,14 +136,13 @@ export class TanStackInstaller extends FrameworkInstaller {
     const readmeFilePath = join(this.targetPath, 'README.md');
     const readmeSection = generateReadmeSection(selectedProviders);
 
-    if (readmeSection) {
-      await replacePlaceholder(
-        readmeFilePath,
-        '<!-- {{OAUTH_SETUP_GUIDE}} -->',
-        readmeSection,
-        { graceful: true }
-      );
-    }
+    // Always call to remove placeholder even when no providers selected
+    await replacePlaceholder(
+      readmeFilePath,
+      '<!-- {{OAUTH_SETUP_GUIDE}} -->',
+      readmeSection,
+      { graceful: true }
+    );
   }
 
   /**

@@ -46,6 +46,12 @@ export const convexAdapter = <DataModel extends GenericDataModel>(
 
       return {
         id: "convex",
+        // Tell the convex() plugin this context supports mutations. It checks
+        // ctx.context.adapter.options?.isRunMutationCtx — if falsy it replaces all
+        // adapter writes with silent no-ops. HTTP actions always have runMutation.
+        options: {
+          isRunMutationCtx: "runMutation" in ctx,
+        },
 
         create: async ({ data, model, select }): Promise<any> => {
           return await ctx.runMutation(internal.auth.db.dbCreate, {
@@ -185,34 +191,12 @@ export const convexAdapter = <DataModel extends GenericDataModel>(
         if (data && fieldAttributes.type === "date") {
           return new Date(data).getTime();
         }
-        // Handle array fields - Better Auth may send single values or arrays
-        if ((fieldAttributes.type as string)?.endsWith("[]")) {
-          // If already an array, return as-is
-          if (Array.isArray(data)) {
-            return data
-          }
-          // If it's a string that looks like JSON array, parse it
-          if (typeof data === "string") {
-            try {
-              const parsed = JSON.parse(data)
-              return Array.isArray(parsed) ? parsed : [data]
-            } catch {
-              // If parsing fails, wrap the string in an array
-              return [data]
-            }
-          }
-          // For any other value type, wrap in array
-          if (data !== null && data !== undefined) {
-            return [data]
-          }
-        }
         return data;
       },
       customTransformOutput: ({ data, fieldAttributes }) => {
         if (data && fieldAttributes.type === "date") {
           return new Date(data).getTime();
         }
-        // Arrays are stored natively in Convex, no transformation needed for output
         return data;
       },
       debugLogs: config.debugLogs ?? false,
@@ -226,6 +210,7 @@ export const convexAdapter = <DataModel extends GenericDataModel>(
       supportsDates: false,
       supportsJSON: true,
       supportsNumericIds: false,
+      supportsArrays: true,
       transaction: false,
       usePlural: false,
     },

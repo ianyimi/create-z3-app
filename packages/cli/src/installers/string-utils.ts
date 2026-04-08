@@ -201,10 +201,12 @@ export function generateAuthProvidersBlock(
 ): string {
   const parts: string[] = [];
 
-  // Always add email/password configuration with enabled set to true or false
-  parts.push(`emailAndPassword: {
-      enabled: ${emailPasswordEnabled}
+  // Only add email/password configuration when enabled
+  if (emailPasswordEnabled) {
+    parts.push(`emailAndPassword: {
+      enabled: true
     },`);
+  }
 
   // Add OAuth providers (using object structure)
   if (oauthProviders.length > 0) {

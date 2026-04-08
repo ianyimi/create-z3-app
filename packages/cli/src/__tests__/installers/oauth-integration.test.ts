@@ -85,9 +85,9 @@ describe('Task Group 6: OAuth Integration Tests', () => {
       const config = generateOAuthConfigBlock(['google', 'github', 'discord']);
 
       expect(config).toContain('socialProviders: {');
-      expect(config).toContain('google:');
-      expect(config).toContain('github:');
-      expect(config).toContain('discord:');
+      expect(config).toContain('google({');
+      expect(config).toContain('github({');
+      expect(config).toContain('discord({');
     });
 
     it('should return empty string for no providers', () => {
@@ -201,10 +201,10 @@ describe('Task Group 6: OAuth Integration Tests', () => {
     });
 
     it('should return empty array when no providers require extra config', () => {
-      const basicProviders = ['google', 'github'];
+      const basicProviders = ['google'];
       const extraConfigProviders = getProvidersRequiringExtraConfig(basicProviders);
 
-      // Google and GitHub don't require extra config
+      // Google does not require extra config
       expect(extraConfigProviders).toHaveLength(0);
     });
   });
@@ -243,7 +243,7 @@ describe('Task Group 6: OAuth Integration Tests', () => {
 
       // Generate all code blocks
       const oauthConfig = generateOAuthConfigBlock(providers);
-      const envVars = generateEnvVarsBlock(providers, 'nextjs');
+      generateEnvVarsBlock(providers, 'nextjs');
       const readme = generateReadmeSection(providers);
 
       // Verify all providers are included

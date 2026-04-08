@@ -21,15 +21,15 @@ describe('Task Group 3: String Utils Enhanced Generation', () => {
       // Should contain socialProviders wrapper
       expect(result).toContain('socialProviders: {');
 
-      // Should contain Google config from betterAuthConfig.socialProvider
-      expect(result).toContain('google: {');
-      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID as string');
-      expect(result).toContain('clientSecret: process.env.GOOGLE_CLIENT_SECRET as string');
+      // Should contain Google config from betterAuthConfig.socialProvider (function call format)
+      expect(result).toContain('google({');
+      expect(result).toContain('clientId: process.env.GOOGLE_CLIENT_ID!');
+      expect(result).toContain('clientSecret: process.env.GOOGLE_CLIENT_SECRET!');
 
       // Should contain GitHub config from betterAuthConfig.socialProvider
-      expect(result).toContain('github: {');
-      expect(result).toContain('clientId: process.env.GITHUB_CLIENT_ID as string');
-      expect(result).toContain('clientSecret: process.env.GITHUB_CLIENT_SECRET as string');
+      expect(result).toContain('github({');
+      expect(result).toContain('clientId: process.env.GITHUB_CLIENT_ID!');
+      expect(result).toContain('clientSecret: process.env.GITHUB_CLIENT_SECRET!');
     });
 
     it('should return empty string for empty provider array', () => {

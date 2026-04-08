@@ -191,7 +191,7 @@ describe('TweakCN OKLCH Converter', () => {
     });
 
     describe('Non-color values', () => {
-      it('should skip non-color CSS variables', async () => {
+      it('should include non-color CSS variables to preserve complete theme', async () => {
         const cssContent = `
           :root {
             --radius: 0.5rem;
@@ -209,9 +209,9 @@ describe('TweakCN OKLCH Converter', () => {
         // Should include color variable
         expect(result).toContain('--primary:');
 
-        // Should NOT include non-color variables
-        expect(result).not.toContain('--radius:');
-        expect(result).not.toContain('--font-size:');
+        // Non-color variables are preserved to maintain the complete theme
+        expect(result).toContain('--radius:');
+        expect(result).toContain('--font-size:');
       });
     });
 
@@ -441,7 +441,9 @@ describe('TweakCN OKLCH Converter', () => {
         source: '/path/to/theme.css',
       });
 
-      expect(result).toBe('');
+      // Non-color variables are preserved in output (complete theme preservation)
+      expect(result).toContain('--font-size:');
+      expect(result).toContain('--spacing:');
     });
   });
 

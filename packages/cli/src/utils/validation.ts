@@ -1,6 +1,5 @@
 import validateNpmPackageName from 'validate-npm-package-name';
 import fs from 'fs-extra';
-import { basename } from 'path';
 
 /**
  * Validates a project name using npm package name validation rules.
@@ -68,7 +67,7 @@ export async function isDirectoryEmpty(dirPath: string): Promise<boolean> {
  * @param cwd - The current working directory path
  * @returns The project name (kept as "." if that was the input)
  */
-export function resolveProjectName(input: string, cwd: string): string {
+export function resolveProjectName(input: string, _cwd: string): string {
   // Keep "." as-is - don't convert to basename
   // The basename will be used for validation and package.json, but not for directory creation
   return input;

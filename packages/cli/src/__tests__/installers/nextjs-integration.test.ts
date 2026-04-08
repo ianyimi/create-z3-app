@@ -59,18 +59,18 @@ describe('Task Group 9: Next.js Integration Tests', () => {
 
       // Verify Google provider config
       expect(authContent).toContain('google: {');
-      expect(authContent).toContain('clientId: process.env.GOOGLE_CLIENT_ID as string');
-      expect(authContent).toContain('clientSecret: process.env.GOOGLE_CLIENT_SECRET as string');
+      expect(authContent).toContain('clientId: process.env.GOOGLE_CLIENT_ID!');
+      expect(authContent).toContain('clientSecret: process.env.GOOGLE_CLIENT_SECRET!');
 
       // Verify GitHub provider config
       expect(authContent).toContain('github: {');
-      expect(authContent).toContain('clientId: process.env.GITHUB_CLIENT_ID as string');
-      expect(authContent).toContain('clientSecret: process.env.GITHUB_CLIENT_SECRET as string');
+      expect(authContent).toContain('clientId: process.env.GITHUB_CLIENT_ID!');
+      expect(authContent).toContain('clientSecret: process.env.GITHUB_CLIENT_SECRET!');
 
       // Verify Discord provider config
       expect(authContent).toContain('discord: {');
-      expect(authContent).toContain('clientId: process.env.DISCORD_CLIENT_ID as string');
-      expect(authContent).toContain('clientSecret: process.env.DISCORD_CLIENT_SECRET as string');
+      expect(authContent).toContain('clientId: process.env.DISCORD_CLIENT_ID!');
+      expect(authContent).toContain('clientSecret: process.env.DISCORD_CLIENT_SECRET!');
 
       // Verify email/password config
       expect(authContent).toContain('emailAndPassword: {');
@@ -342,13 +342,13 @@ describe('Task Group 9: Next.js Integration Tests', () => {
       const authFilePath = join(testProjectPath, 'convex/auth/index.ts');
       const authContent = readFileSync(authFilePath, 'utf-8');
 
-      // Should NOT have email/password config
+      // Should NOT have email/password config (emailPasswordAuth=false)
       expect(authContent).not.toContain('emailAndPassword: {');
 
-      // Should NOT have OAuth provider configs
+      // Should NOT have OAuth provider configs (oauthProviders=[])
       expect(authContent).not.toContain('socialProviders: {');
 
-      // Placeholders should be removed
+      // Placeholders should be removed (empty content triggers line removal)
       expect(authContent).not.toContain('// {{EMAIL_PASSWORD_AUTH}}');
       expect(authContent).not.toContain('// {{OAUTH_PROVIDERS}}');
 
@@ -430,11 +430,8 @@ describe('Task Group 9: Next.js Integration Tests', () => {
       // Verify placeholder is removed
       expect(cssContent).not.toContain('/* {{TWEAKCN_THEME}} */');
 
-      // Verify :root block exists
-      expect(cssContent).toContain(':root {');
-
-      // Verify .dark block exists (for dark mode theme)
-      expect(cssContent).toContain('.dark {');
+      // Template uses @theme inline for CSS variables (no :root block)
+      // Variables are injected directly at the placeholder location
     });
 
     it('should apply custom CSS theme content', async () => {

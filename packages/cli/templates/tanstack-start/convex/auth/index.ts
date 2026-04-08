@@ -39,7 +39,7 @@ export const createAuth = (
     trustedOrigins: [process.env.SITE_URL!],
     user: {
       additionalFields: {
-        role: {
+        roles: {
           type: "string[]",
           defaultValue: [USER_ROLES.user],
           required: true

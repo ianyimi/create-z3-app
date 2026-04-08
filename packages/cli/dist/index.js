@@ -37,7 +37,7 @@ async function isDirectoryEmpty(dirPath) {
     return true;
   }
 }
-function resolveProjectName(input2, cwd) {
+function resolveProjectName(input2, _cwd) {
   return input2;
 }
 
@@ -1798,9 +1798,11 @@ function generateCredentialsValue(enabled) {
 }
 function generateAuthProvidersBlock(oauthProviders, emailPasswordEnabled) {
   const parts = [];
-  parts.push(`emailAndPassword: {
-      enabled: ${emailPasswordEnabled}
+  if (emailPasswordEnabled) {
+    parts.push(`emailAndPassword: {
+      enabled: true
     },`);
+  }
   if (oauthProviders.length > 0) {
     const providersObject = oauthProviders.map((providerId) => {
       const provider = getProvider(providerId);
@@ -2300,13 +2302,12 @@ var TanStackInstaller = class extends FrameworkInstaller {
   async updateEnvExample(selectedProviders) {
     const envFilePath = join2(this.targetPath, ".env.example");
     const envVarsBlock = generateEnvVarsBlock(selectedProviders, "tanstack");
-    if (envVarsBlock) {
-      await replacePlaceholder(
-        envFilePath,
-        "# {{ENV_OAUTH_VARS}}",
-        envVarsBlock
-      );
-    }
+    await replacePlaceholder(
+      envFilePath,
+      "# {{ENV_OAUTH_VARS}}",
+      envVarsBlock,
+      { graceful: true }
+    );
   }
   /**
    * Update README with OAuth provider setup guides
@@ -2319,14 +2320,12 @@ var TanStackInstaller = class extends FrameworkInstaller {
   async updateReadme(selectedProviders) {
     const readmeFilePath = join2(this.targetPath, "README.md");
     const readmeSection = generateReadmeSection(selectedProviders);
-    if (readmeSection) {
-      await replacePlaceholder(
-        readmeFilePath,
-        "<!-- {{OAUTH_SETUP_GUIDE}} -->",
-        readmeSection,
-        { graceful: true }
-      );
-    }
+    await replacePlaceholder(
+      readmeFilePath,
+      "<!-- {{OAUTH_SETUP_GUIDE}} -->",
+      readmeSection,
+      { graceful: true }
+    );
   }
   /**
    * Apply TweakCN theme to global CSS file
