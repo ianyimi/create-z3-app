@@ -14,7 +14,7 @@ import type { DataModel } from "../_generated/dataModel"
 
 import schema from "../schema"
 import { convexAdapter } from "./adapter"
-import betterAuthPlugins from "./plugins"
+import { createPlugins } from "./plugins"
 
 export const createAuth = (
   ctx: GenericActionCtx<DataModel>,
@@ -31,7 +31,7 @@ export const createAuth = (
     logger: {
       disabled: optionsOnly
     },
-    plugins: betterAuthPlugins,
+    plugins: createPlugins(),
     secret: process.env.BETTER_AUTH_SECRET,
     session: {
       modelName: TABLE_SLUG_SESSIONS
